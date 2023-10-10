@@ -1,0 +1,132 @@
+as.data.frame.udpipe_connlu
+                        Convert the result of udpipe_annotate to a tidy
+                        data frame
+as.matrix.cooccurrence
+                        Convert the result of cooccurrence to a sparse
+                        matrix
+as_conllu               Convert a data.frame to CONLL-U format
+as_cooccurrence         Convert a matrix to a co-occurrence data.frame
+as_fasttext             Combine labels and text as used in fasttext
+as_phrasemachine        Convert Parts of Speech tags to one-letter tags
+                        which can be used to identify phrases based on
+                        regular expressions
+as_word2vec             Convert a matrix of word vectors to word2vec
+                        format
+brussels_listings       Brussels AirBnB address locations available at
+                        www.insideairbnb.com
+brussels_reviews        Reviews of AirBnB customers on Brussels address
+                        locations available at www.insideairbnb.com
+brussels_reviews_anno   Reviews of the AirBnB customers which are
+                        tokenised, POS tagged and lemmatised
+brussels_reviews_w2v_embeddings_lemma_nl
+                        An example matrix of word embeddings
+cbind_dependencies      Add the dependency parsing information to an
+                        annotated dataset
+cbind_morphological     Add morphological features to an annotated
+                        dataset
+cooccurrence            Create a cooccurence data.frame
+document_term_frequencies
+                        Aggregate a data.frame to the document/term
+                        level by calculating how many times a term
+                        occurs per document
+document_term_frequencies_statistics
+                        Add Term Frequency, Inverse Document Frequency
+                        and Okapi BM25 statistics to the output of
+                        document_term_frequencies
+document_term_matrix    Create a document/term matrix
+dtm_align               Reorder a Document-Term-Matrix alongside a
+                        vector or data.frame
+dtm_bind                Combine 2 document term matrices either by rows
+                        or by columns
+dtm_chisq               Compare term usage across 2 document groups
+                        using the Chi-square Test for Count Data
+dtm_colsums             Column sums and Row sums for document term
+                        matrices
+dtm_conform             Make sure a document term matrix has exactly
+                        the specified rows and columns
+dtm_cor                 Pearson Correlation for Sparse Matrices
+dtm_remove_lowfreq      Remove terms occurring with low frequency from
+                        a Document-Term-Matrix and documents with no
+                        terms
+dtm_remove_sparseterms
+                        Remove terms with high sparsity from a
+                        Document-Term-Matrix
+dtm_remove_terms        Remove terms from a Document-Term-Matrix and
+                        keep only documents which have a least some
+                        terms
+dtm_remove_tfidf        Remove terms from a Document-Term-Matrix and
+                        documents with no terms based on the term
+                        frequency inverse document frequency
+dtm_reverse             Inverse operation of the document_term_matrix
+                        function
+dtm_sample              Random samples and permutations from a
+                        Document-Term-Matrix
+dtm_svd_similarity      Semantic Similarity to a Singular Value
+                        Decomposition
+dtm_tfidf               Term Frequency - Inverse Document Frequency
+                        calculation
+keywords_collocation    Extract collocations - a sequence of terms
+                        which follow each other
+keywords_phrases        Extract phrases - a sequence of terms which
+                        follow each other based on a sequence of Parts
+                        of Speech tags
+keywords_rake           Keyword identification using Rapid Automatic
+                        Keyword Extraction (RAKE)
+paste.data.frame        Concatenate text of each group of data together
+predict.LDA_VEM         Predict method for an object of class LDA_VEM
+                        or class LDA_Gibbs
+strsplit.data.frame     Obtain a tokenised data frame by splitting text
+                        alongside a regular expression
+syntaxpatterns-class    Experimental and undocumented querying of
+                        syntax patterns
+syntaxrelation-class    Experimental and undocumented querying of
+                        syntax relationships
+txt_collapse            Collapse a character vector while removing
+                        missing data.
+txt_contains            Check if text contains a certain pattern
+txt_context             Based on a vector with a word sequence, get
+                        n-grams (looking forward + backward)
+txt_count               Count the number of times a pattern is
+                        occurring in text
+txt_freq                Frequency statistics of elements in a vector
+txt_grepl               Look up a multiple patterns and indicate their
+                        presence in text
+txt_highlight           Highlight words in a character vector
+txt_next                Get the n-th next element of a vector
+txt_nextgram            Based on a vector with a word sequence, get
+                        n-grams (looking forward)
+txt_overlap             Get the overlap between 2 vectors
+txt_paste               Concatenate strings with options how to handle
+                        missing data
+txt_previous            Get the n-th previous element of a vector
+txt_previousgram        Based on a vector with a word sequence, get
+                        n-grams (looking backward)
+txt_recode              Recode text to other categories
+txt_recode_ngram        Recode words with compound multi-word
+                        expressions
+txt_sample              Boilerplate function to sample one element from
+                        a vector.
+txt_sentiment           Perform dictionary-based sentiment analysis on
+                        a tokenised data frame
+txt_show                Boilerplate function to cat only 1 element of a
+                        character vector.
+txt_tagsequence         Identify a contiguous sequence of tags as 1
+                        being entity
+udpipe                  Tokenising, Lemmatising, Tagging and Dependency
+                        Parsing of raw text in TIF format
+udpipe_accuracy         Evaluate the accuracy of your UDPipe model on
+                        holdout data
+udpipe_annotate         Tokenising, Lemmatising, Tagging and Dependency
+                        Parsing Annotation of raw text
+udpipe_annotation_params
+                        List with training options set by the UDPipe
+                        community when building models based on the
+                        Universal Dependencies data
+udpipe_download_model   Download an UDPipe model provided by the UDPipe
+                        community for a specific language of choice
+udpipe_load_model       Load an UDPipe model
+udpipe_read_conllu      Read in a CONLL-U file as a data.frame
+udpipe_train            Train a UDPipe model
+unique_identifier       Create a unique identifier for each combination
+                        of fields in a data frame
+unlist_tokens           Create a data.frame from a list of tokens
