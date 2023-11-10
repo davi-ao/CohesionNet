@@ -14,6 +14,11 @@ synonyms_hypernyms = read_csv('./english_synonyms_hypernyms.csv',
 
 # Define UI --------------------------------------------------------------------
 ui = fluidPage(
+  tags$head(
+    tags$style(
+      HTML("#dashboard{margin-bottom:50px;}")
+    )
+  ),
   titlePanel('CohesionNet'),
   
   sidebarLayout(
@@ -21,16 +26,43 @@ ui = fluidPage(
       helpText('Calculate the cohesion indices of Oliveira, Senna e Pereira 
                (2024) of a text.'),
       fileInput('file', label = h3('Select text file')),
-      actionButton('analyze', label = 'Run analysis', icon = icon('play'))
+      actionButton('analyze', label = 'Run analysis', icon = icon('play')),
+      hr(),
+      helpText(h4('Instructions')),
+      helpText('Click on the \'Browse...\' button to select a .txt file for 
+               analysis. Ensure the file contains a single text and that [.:?!…] 
+               are used exclusively as sentence delimiters. Replace any other 
+               uses of these characters with different ones; for instance 
+               replace decimal separators like in "1.5" with underscores, making 
+               it "1_5".'),
+      hr(),
+      helpText(h4('References')),
+      helpText('Please, cite the following work when using this app:'),
+      helpText('Oliveira, D. A., Senna, V., & Pereira, H. B. B. (2024). 
+               Indices of Textual Cohesion by Lexical Repetition Based on 
+               Semantic Networks of Cliques. Expert Systems with Applications, 
+               237(2024), 121580. https://doi.org/10.1016/j.eswa.2023.121580')
     ),
     mainPanel(
-      h3(textOutput('results_title')),
-      uiOutput('download_processed_text'),
-      h4(textOutput('results_cliques_title')),
-      uiOutput('download_results_cliques'),
-      tableOutput('results'),
-      h4(textOutput('results_text_title')),
-      tableOutput('results_mean')
+      div(
+        style="margin-bottom: 15px;",
+        h3(textOutput('results_title')),
+        h4(textOutput('results_cliques_title')),
+        tableOutput('results'),
+        h4(textOutput('results_text_title')),
+        tableOutput('results_mean'),
+        hr(),
+        h4(textOutput('download_processed_text_title')),
+        textOutput('download_processed_text_info'),
+        uiOutput('download_processed_text'),
+        hr(),
+        h4(textOutput('download_results_cliques_title')),
+        uiOutput('download_results_cliques'),
+        hr(),
+        h4(textOutput('download_network_title')),
+        textOutput('download_network_info'),
+        uiOutput('download_network'),
+      )
     )
   )
 )
@@ -96,35 +128,46 @@ server = function(input, output) {
       select(Index, `Clique ID`, Vertex, Edge)
   })
   
+  network = eventReactive(input$analyze, {
+    req(data())
+    stems = data()$stem %>% unique()
+    edgelist = data() %>%
+      select(clique_id, stem) %>%
+      mutate(Source = match(stem, stems),
+             Target = Source) %>%
+      group_by(clique_id) %>%
+      expand(Source, Target) %>%
+      filter(Source != Target) %>%
+      mutate(edge_id = mapply(function(s, t) {
+        sort(c(s, t)) %>%
+          paste(collapse = '_')
+      },
+      Source, Target)) %>%
+      ungroup() %>%
+      distinct(edge_id, .keep_all = T) %>%
+      select(Source, Target)
+    
+    "*Vertices " %>%
+      str_c(stems %>% length(), '\n') %>%
+      str_c(paste0(1:length(stems), ' "', stems, '"', collapse = '\n'), 
+            '\n') %>%
+      str_c('*Edges\n') %>%
+      str_c(paste(edgelist$Source, edgelist$Target, collapse = '\n'))
+  })
+  
   selectedTextFileName = eventReactive(input$analyze, {
     req(input$file$name)
     req(input$file$type[1] == 'text/plain')
-    input$file$name
+    paste('Results for file', input$file$name)
   })
   
   output$results_title = renderText(
     selectedTextFileName()
   )
   
-  output$download_processed_text = renderUI({
-    req(data())
-    list(
-      downloadButton('download_data_csv', 'Download processed text (CSV)'),
-      downloadButton('download_data_xlsx', '(XLSX)')
-    )
-  })
-  
   output$results_cliques_title = renderText({
     req(results())
-    'Values for the first 5 sentences/cliques'
-  })
-  
-  output$download_results_cliques = renderUI({
-    req(results())
-    list(
-      downloadButton('download_results_csv', 'Download complete results (CSV)'),
-      downloadButton('download_results_xlsx', '(XLSX)')
-    )
+    'Indices values for the first 5 sentences/cliques'
   })
   
   output$results = renderTable({
@@ -145,11 +188,62 @@ server = function(input, output) {
                 Edge = mean(Edge))
   })
   
+  output$download_processed_text_title = renderText({
+    req(data())
+    'Use the buttons below to download the processed text.'
+  })
+  
+  output$download_processed_text_info = renderText({
+    req(data())
+    'This allows 
+    you inspect the results of tokenization, lemmatization, POS tagging, 
+    stemming and the identification of synonyms and hypernyms.'
+  })
+  
+  output$download_processed_text = renderUI({
+    req(data())
+    list(
+      downloadButton('download_data_csv', 'Processed text (CSV)'),
+      downloadButton('download_data_xlsx', 'Processed text (XLSX)')
+    )
+  })
+  
+  output$download_results_cliques_title = renderText({
+    req(data())
+    'Use the buttons below to download the complete results.'
+  })
+  
+  output$download_results_cliques = renderUI({
+    req(results())
+    list(
+      downloadButton('download_results_csv', 'Complete results (CSV)'),
+      downloadButton('download_results_xlsx', 'Complete results (XLSX)')
+    )
+  })
+  
+  output$download_network_title = renderText({
+    req(data())
+    'Use the button below to download the text network.'
+  })
+  
+  output$download_network_info = renderText({
+    req(data())
+    'Cohesion edges not included.'
+  })
+  
+  output$download_network = renderUI({
+    req(results())
+    downloadButton('download_network_net', 'Network (Pajek NET)')
+  })
+  
   output$download_data_csv = downloadHandler(
     filename = function() {
-      selectedTextFileName() %>%
-        str_sub(1, -5) %>%
-        str_c('_processed.csv')
+      'Processed text ' %>%
+        str_c(
+          selectedTextFileName() %>%
+            str_sub(18, -5) %>%
+            str_c('.csv')
+        )
     },
     content = function(file) {
       write.csv(data(), file, row.names = F)
@@ -158,9 +252,12 @@ server = function(input, output) {
   
   output$download_data_xlsx = downloadHandler(
     filename = function() {
-      selectedTextFileName() %>%
-        str_sub(1, -5) %>%
-        str_c('_processed.xlsx')
+      'Processed text ' %>%
+        str_c(
+          selectedTextFileName() %>%
+            str_sub(18, -5) %>%
+            str_c('.xlsx')
+        )
     },
     content = function(file) {
       write.xlsx(data(), file, rowNames = F)
@@ -171,7 +268,7 @@ server = function(input, output) {
     filename = function() {
       selectedTextFileName() %>%
         str_sub(1, -5) %>%
-        str_c('_results.csv')
+        str_c('.csv')
     },
     content = function(file) {
       write.csv(results(), file, row.names = F)
@@ -182,10 +279,24 @@ server = function(input, output) {
     filename = function() {
       selectedTextFileName() %>%
         str_sub(1, -5) %>%
-        str_c('_results.xlsx')
+        str_c('.xlsx')
     },
     content = function(file) {
       write.xlsx(results(), file, rowNames = F)
+    }
+  )
+  
+  output$download_network_net = downloadHandler(
+    filename = function() {
+      'Network for ' %>%
+        str_c(
+          selectedTextFileName() %>%
+            str_sub(18, -5) %>%
+            str_c('.net')
+        )
+    },
+    content = function(file) {
+      write_file(network(), file)
     }
   )
 }

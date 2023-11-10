@@ -28,7 +28,7 @@ const rscript = path.join(rpath, 'bin', 'R')
 
 const shinyAppPath = path.join(app.getAppPath(), 'shiny')
 
-const backgroundColor = '#2c3e50'
+const backgroundColor = '#ffffff'
 
 // We have to launch a child process for the R shiny webserver
 // Things we need to take into account:
@@ -144,13 +144,14 @@ let errorSplashScreen
 
 const createWindow = (shinyUrl) => {
     mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1200,
+        height: 850,
         show: false,
         webPreferences: {
             nodeIntegration: false,
             contextIsolation: true
-        }
+        },
+        autoHideMenuBar: true
     })
 
     mainWindow.loadURL(shinyUrl)
@@ -163,9 +164,10 @@ const createWindow = (shinyUrl) => {
 }
 
 const splashScreenOptions = {
-    width: 800,
-    height: 600,
-    backgroundColor: backgroundColor
+    width: 250,
+    height: 250,
+    backgroundColor: backgroundColor,
+    frame: false,
 }
 
 const createSplashScreen = (filename) => {

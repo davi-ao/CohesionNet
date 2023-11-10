@@ -27,7 +27,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
   }
 
 .spinner > div {
-  background-color: white;
+  background-color: #555;
   height: 100%;
   width: 6px;
   display: inline-block;
@@ -73,7 +73,7 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #status {
 text-align: center;
-color: white;
+color: #555;
 font-size: 10px;	
 font-family: Arial,Helvetica Neue,Helvetica,sans-serif; 
 }
