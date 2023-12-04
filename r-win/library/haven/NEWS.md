@@ -1,3 +1,7 @@
+# haven 2.5.4
+
+* Fix for upcoming R-devel change.
+
 # haven 2.5.3
 
 * Fix for upcoming R-devel change.

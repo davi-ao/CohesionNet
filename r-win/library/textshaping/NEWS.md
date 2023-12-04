@@ -1,3 +1,7 @@
+# textshaping 0.3.7
+
+* Prepare for Arm Windows
+
 # textshaping 0.3.6
 
 * Fix a bug in fallback font loading which would crash the process if the font 

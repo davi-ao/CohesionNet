@@ -61,7 +61,7 @@ ui = fluidPage(
       helpText('Click on the \'Browse...\' button to select a .txt file for
                analysis. Ensure the file contains a single text and that [.:?!…]
                are used exclusively as sentence delimiters. Replace any other
-               uses of these characters with different ones; for instance
+               # uses of these characters with different ones; for instance
                replace decimal separators like in "1.5" with underscores, making
                it "1_5".'),
       hr(),

@@ -1,5 +1,10 @@
 # systemfonts 1.0.4
 
+* Use Courier New as default mono font on macOS instead of Courier to avoid 
+  issues between FreeType and Courier (#105)
+
+# systemfonts 1.0.4
+
 * Provide a fallback solution to the setup of the CRAN windows builder so that
   fonts can be discovered (#87)
 

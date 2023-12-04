@@ -1,3 +1,22 @@
+# vctrs 0.6.5
+
+* Internal changes requested by CRAN around C level format strings (#1896).
+
+* Fixed tests related to changes to `dim<-()` in R-devel (#1889).
+
+# vctrs 0.6.4
+
+* Fixed a performance issue with `vec_c()` and ALTREP vectors (in particular,
+  the new ALTREP list vectors in R-devel) (#1884).
+
+* Fixed an issue with complex vector tests related to changes in R-devel
+  (#1883).
+
+* Added a class to the `vec_locate_matches()` error that is thrown when an
+  overflow would otherwise occur (#1845).
+
+* Fixed an issue with `vec_rank()` and 0-column data frames (#1863).
+
 # vctrs 0.6.3
 
 * Fixed an issue where certain ALTREP row names were being materialized when
@@ -54,7 +73,7 @@
   `multiple = "warning"`, which have been removed from the documentation and
   silently soft-deprecated. Official deprecation for those options will start in
   a future release (#1791).
-  
+
 * `vec_locate_matches()` has changed its default `needles_arg` and
   `haystack_arg` values from `""` to `"needles"` and `"haystack"`, respectively.
   This generally generates more informative error messages (#1792).
@@ -68,7 +87,7 @@
 
 * The `numeric_version` type from base R is now better supported in equality,
   comparison, and order based operations (tidyverse/dplyr#6680).
-  
+
 * R >=3.5.0 is now explicitly required. This is in line with the tidyverse
   policy of supporting the [5 most recent versions of
   R](https://www.tidyverse.org/blog/2019/04/r-version-support/).
@@ -77,7 +96,7 @@
 
 * New `vec_expand_grid()`, which is a lower level helper that is similar to
   `tidyr::expand_grid()` (#1325).
-  
+
 * New `vec_set_intersect()`, `vec_set_difference()`, `vec_set_union()`, and
   `vec_set_symmetric_difference()` which compute set operations like
   `intersect()`, `setdiff()`, and `union()`, but the vctrs variants don't strip
@@ -144,7 +163,7 @@
   like specifying `repair = "unique", quiet = TRUE`. When the `"*_quiet"`
   options are used, any setting of `quiet` is silently overridden (@jennybc,
   #1629).
-  
+
   `"unique_quiet"` and `"universal_quiet"` are also newly accepted for the name
   repair argument of several other functions that do not expose a `quiet`
   argument: `data_frame()`, `df_list()`, `vec_c()`, `list_unchop()`,
@@ -462,11 +481,11 @@
   to implement, but if your class has a static prototype, you might consider
   implementing a custom `vec_ptype()` method that returns a constant to
   improve performance in some cases (such as common type imputation).
-  
+
 * New `vec_detect_complete()`, inspired by `stats::complete.cases()`. For most
   vectors, this is identical to `!vec_equal_na()`. For data frames and
   matrices, this detects rows that only contain non-missing values.
-  
+
 * `vec_order()` can now order complex vectors (#1330).
 
 * Removed dependency on digest in favor of `rlang::hash()`.
@@ -475,7 +494,7 @@
   when used as a data frame column (#1318).
 
 * `register_s3()` is now licensed with the "unlicense" which makes it very
-  clear that it's fine to copy and paste into your own package 
+  clear that it's fine to copy and paste into your own package
   (@maxheld83, #1254).
 
 # vctrs 0.3.6

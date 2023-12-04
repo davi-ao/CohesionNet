@@ -14,6 +14,7 @@ attrassign              Create new-style "assign" attribute
 basehaz                 Alias for the survfit function
 bladder                 Bladder Cancer Recurrences
 blogit                  Bounded link functions
+brier                   Compute the Brier score for a Cox model
 cch                     Fits proportional hazards regression model to
                         case-cohort data
 cgd                     Chronic Granulotamous Disease data
@@ -45,6 +46,7 @@ frailty                 Random effects terms
 gbsg                    Breast cancer data sets used in Royston and
                         Altman (2013)
 heart                   Stanford Heart Transplant data
+hoel                    Mouse cancer data
 is.ratetable            Verify that an object is of class ratetable.
 kidney                  Kidney catheter data
 levels.Surv             Return the states of a multi-state Surv object

@@ -1,3 +1,9 @@
+# ragg 1.2.6
+
+* Fix symbol rendering bug on windows (#132)
+* Add support for `dev.capabilities()` (#105)
+* Prepare for Arm Windows
+
 # ragg 1.2.5
 
 * Fix a bug when rendering glyphs from a colour font that also provide greyscale
