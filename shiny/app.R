@@ -24,6 +24,7 @@ library(udpipe)
 library(SnowballC)
 library(openxlsx)
 library(shinyWidgets)
+library(shinycssloaders)
 
 # Load local dependencies ------------------------------------------------------
 # Cohesion funcions
@@ -74,7 +75,7 @@ ui = fluidPage(
     mainPanel(
       div(
         style="margin-bottom: 15px;",
-        h3(textOutput('results_title')),
+        h3(withSpinner(textOutput('results_title'))),
         h4(textOutput('results_cliques_title')),
         tableOutput('results'),
         h4(textOutput('results_text_title')),
