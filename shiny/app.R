@@ -24,7 +24,8 @@ library(udpipe)
 library(SnowballC)
 library(openxlsx)
 library(shinyWidgets)
-library(shinycssloaders)
+library(bslib)
+library(DT)
 
 # Load local dependencies ------------------------------------------------------
 # Cohesion funcions
@@ -32,392 +33,256 @@ source('cohesion_functions.R')
 # Udpipe parsing function
 source('udpipe_parsing_function.R')
 
-# English model for udpipe
-model = udpipe_load_model('./english-lines-ud-2.5-191206.udpipe')
-synonyms_hypernyms = read_csv('./english_synonyms_hypernyms.csv',
-                              show_col_types = F)
-
 ################################################################################
 # SHINY CODE                                                                   #
 ################################################################################
 # Define UI --------------------------------------------------------------------
 # Fluid container
-ui = fluidPage(
-  tags$head(
-    tags$style(
-      HTML("#dashboard{margin-bottom:50px;}")
-    )
-  ),
-  titlePanel('CohesionNet'),
-
-  sidebarLayout(
-    sidebarPanel(
-      helpText('Calculate the cohesion indices of Oliveira, Senna e Pereira
-               (2024) of a text.'),
-      fileInput('file', label = h3('Select text file')),
-      actionButton('analyze', label = 'Run analysis', icon = icon('play')),
-      hr(),
-      helpText(h4('Instructions')),
-      helpText('Click on the \'Browse...\' button to select a .txt file for
+ui = page_sidebar(
+  title = 'CohesionNet',
+  sidebar = sidebar(
+    width = '400px',
+    fileInput('file', label = h4('Select text files'), multiple = T),
+    selectInput('language', 
+                label = h4('Select the language'),
+                choices = list('English' = 1, 
+                               'Portuguese' = 2, 
+                               'Spanish' = 3)),
+    actionButton('analyze', label = 'Run analysis', icon = icon('play')),
+    helpText(h5('Instructions')),
+    helpText('Click on the \'Browse...\' button to select a .txt file for
                analysis. Ensure the file contains a single text and that [.:?!…]
                are used exclusively as sentence delimiters. Replace any other
                # uses of these characters with different ones; for instance
                replace decimal separators like in "1.5" with underscores, making
                it "1_5".'),
-      hr(),
-      helpText(h4('References')),
-      helpText('Please, cite the following work when using this app:'),
-      helpText('Oliveira, D. A., Senna, V., & Pereira, H. B. B. (2024).
-               Indices of Textual Cohesion by Lexical Repetition Based on
-               Semantic Networks of Cliques. Expert Systems with Applications,
-               237(2024), 121580. https://doi.org/10.1016/j.eswa.2023.121580')
-    ),
-    mainPanel(
-      div(
-        style="margin-bottom: 15px;",
-        h3(withSpinner(textOutput('results_title'))),
-        h4(textOutput('results_cliques_title')),
-        tableOutput('results'),
-        h4(textOutput('results_text_title')),
-        tableOutput('results_mean'),
-        hr(),
-        h4(textOutput('download_processed_text_title')),
-        textOutput('download_processed_text_info'),
-        uiOutput('download_processed_text'),
-        hr(),
-        h4(textOutput('download_results_cliques_title')),
-        uiOutput('download_results_cliques'),
-        hr(),
-        h4(textOutput('download_network_title')),
-        textOutput('download_network_info'),
-        uiOutput('download_network'),
-      )
-    )
+    helpText(h5('References')),
+    helpText('Please, cite the following work when using this app: Oliveira, D. 
+              A., Senna, V., & Pereira, H. B. B. (2024). Indices of Textual 
+              Cohesion by Lexical Repetition Based on Semantic Networks of 
+              Cliques. Expert Systems with Applications, 237(2024), 121580. 
+             https://doi.org/10.1016/j.eswa.2023.121580')
+  ),
+  navset_card_tab(
+    id = 'results',
+    title = 'Results'
+  ),
+  div(
+    downloadButton('download_processed_texts',
+                   'Processed texts (.xlsx)',
+                   icon = icon('download')),
+    downloadButton('download_results_cliques',
+                   'Results (.xlsx)',
+                   icon = icon('download')),
+    downloadButton('download_networks',
+                   'Networks (.net)',
+                   icon = icon('download'))
   )
 )
 
 # Define server logic ----------------------------------------------------------
-server = function(input, output) {
-  # Preprocess
-  data = eventReactive(input$analyze, {
+server = function(input, output, session) {
+  data = reactive({
     validate(
       need(input$file, 'You must select a text file.'),
       need(input$file$type[1] == 'text/plain',
            'Invalid file: file must be plain text.')
     )
-
-    data = read_file(input$file$datapath[1]) %>%
-      # Parse with udpipe
-      udpipe_parsing(model, synonyms_hypernyms)
+    
+    lapply(input$file$datapath, function(path) {
+      read_file(path) %>%
+        # Parse with udpipe
+        udpipe_parsing(input$language)
+    })
   })
-
-  results = eventReactive(input$analyze, {
+  
+  results = reactive({
     req(data())
-    # Combine the results into a single tibble
-    indices = global_backward_cohesion(data()) %>%
-      select(clique_id, v, e) %>%
-      # Identify the index
-      mutate(index = 'Global Backward Cohesion') %>%
-      bind_rows(
-        local_backward_cohesion(data()) %>%
-          select(clique_id, v, e) %>%
-          # Identify the index
-          mutate(index = 'Local Backward Cohesion')
-      ) %>%
-      bind_rows(
-        mean_pairwise_cohesion(data()) %>%
-          select(clique_id, v, e) %>%
-          # Identify the index
-          mutate(index = 'Mean Pairwise Cohesion')
-      ) %>%
-      rename(Index = index,
-             `Clique ID` = clique_id,
-             Vertex = v,
-             Edge = e) %>%
-      select(Index, `Clique ID`, Vertex, Edge)
+    
+    lapply(data(), function(d) {
+      indices = global_backward_cohesion(d) %>%
+        select(clique_id, v, e) %>%
+        # Identify the index
+        mutate(index = 'Global Backward Cohesion') %>%
+        bind_rows(
+          local_backward_cohesion(d) %>%
+            select(clique_id, v, e) %>%
+            # Identify the index
+            mutate(index = 'Local Backward Cohesion')
+        ) %>%
+        bind_rows(
+          mean_pairwise_cohesion(d) %>%
+            select(clique_id, v, e) %>%
+            # Identify the index
+            mutate(index = 'Mean Pairwise Cohesion')
+        ) %>%
+        rename(Index = index,
+               `Clique ID` = clique_id,
+               Vertex = v,
+               Edge = e) %>%
+        select(Index, `Clique ID`, Vertex, Edge)
+    })
   })
-
-  # Create the network file for download
-  network = eventReactive(input$analyze, {
+  
+  observeEvent(input$analyze, {
     req(data())
-    # Use words stems as vertices
-    stems = data()$stem %>% unique()
-    edgelist = data() %>%
-      select(clique_id, stem) %>%
-      mutate(Source = match(stem, stems),
-             Target = Source) %>%
-      group_by(clique_id) %>%
-      # Create edge list for a network of cliques
-      expand(Source, Target) %>%
-      # Remove self loops
-      filter(Source != Target) %>%
-      mutate(edge_id = mapply(function(s, t) {
-        sort(c(s, t)) %>%
-          paste(collapse = '_')
-      },
-      Source, Target)) %>%
-      ungroup() %>%
-      # Remove mutual edges
-      distinct(edge_id, .keep_all = T) %>%
-      select(Source, Target)
-
-    # Create string in Pajek NET format
-    "*Vertices " %>%
-      str_c(stems %>% length(), '\n') %>%
-      str_c(paste0(1:length(stems), ' "', stems, '"', collapse = '\n'),
-            '\n') %>%
-      str_c('*Edges\n') %>%
-      str_c(paste(edgelist$Source, edgelist$Target, collapse = '\n'))
-  })
-
-  # Get filename
-  selectedTextFileName = eventReactive(input$analyze, {
-    req(input$file$name)
-    req(input$file$type[1] == 'text/plain')
-    paste('Results for file', input$file$name)
-  })
-
-  # Render results title
-  output$results_title = renderText(
-    selectedTextFileName()
-  )
-
-  # Render results subheading
-  output$results_cliques_title = renderText({
     req(results())
-    'Indices values for the first 5 sentences/cliques'
-  })
-
-  # Render results - preview table
-  output$results = renderTable({
-    results() %>%
-      group_by(Index) %>%
-      top_n(5, wt = -`Clique ID`)
-  })
-
-  # Render results subheading
-  output$results_text_title = renderText({
-    req(results())
-    'Mean values'
-  })
-
-  # Render results - mean values table
-  output$results_mean = renderTable({
-    results() %>%
-      group_by(Index) %>%
-      summarize(Vertex = mean(Vertex),
-                Edge = mean(Edge))
-  })
-
-  # Render instructions for downloading the processed text
-  output$download_processed_text_title = renderText({
-    req(data())
-    'Use the buttons below to download the processed text.'
-  })
-
-  # Render information about the download of the processed text
-  output$download_processed_text_info = renderText({
-    req(data())
-    'This allows
-    you inspect the results of tokenization, lemmatization, POS tagging,
-    stemming and the identification of synonyms and hypernyms.'
-  })
-
-  # Render buttons to download the processed text in CSV and XLSX
-  output$download_processed_text = renderUI({
-    req(data())
-    list(
-      downloadButton('download_data_csv', 'Processed text (CSV)'),
-      downloadButton('download_data_xlsx', 'Processed text (XLSX)')
-    )
-  })
-
-  # Render instructions for downloading the complete results
-  output$download_results_cliques_title = renderText({
-    req(data())
-    'Use the buttons below to download the complete results.'
-  })
-
-  # Render the buttons to download the complete results in CSV and XLSX
-  output$download_results_cliques = renderUI({
-    req(results())
-    list(
-      downloadButton('download_results_csv', 'Complete results (CSV)'),
-      downloadButton('download_results_xlsx', 'Complete results (XLSX)')
-    )
-  })
-
-  # Render instructions for downloading the network
-  output$download_network_title = renderText({
-    req(data())
-    'Use the button below to download the text network.'
-  })
-
-  # Render information about the network
-  output$download_network_info = renderText({
-    req(data())
-    'Cohesion edges not included.'
-  })
-
-  # Render the button to download the network in Pajek NET format
-  output$download_network = renderUI({
-    req(results())
-    downloadButton('download_network_net', 'Network (Pajek NET)')
-  })
-
-  # Prepare the CSV file with the processed text data
-  output$download_data_csv = downloadHandler(
-    filename = function() {
-      'Processed text ' %>%
-        str_c(
-          selectedTextFileName() %>%
-            str_sub(18, -5) %>%
-            str_c('.csv')
-        )
-    },
-    content = function(file) {
-      write.csv(data(), file, row.names = F)
+    
+    nav_remove('results', 'Error')
+    
+    if(is.null(input$file)) {
+      nav_insert('results', 
+                 nav_panel('Error',
+                           div(p('You must select at least one text file.')), 
+                           style = 'padding:1em;color:red'),
+                 select = T)
+    } else if (!(input$file$type == 'text/plain') %>% all()) {
+      nav_insert('results', 
+                 nav_panel('Error',
+                           div(p('Files must be in .txt format')), 
+                           style = 'padding:1em;color:red'),
+                 select = T)
+    } else {
+      nav_insert('results', 
+                 nav_panel('Processing...',
+                           div(p('Parsing texts...')), 
+                           style = 'padding:1em'),
+                 select = T)
+      
+      lapply(1:length(results()), function(i) {
+        nav_remove('results', paste('Text', i))
+        
+        nav_insert('results', 
+                   nav_panel(paste('Text', i),
+                             h4(renderText(paste('Results for', 
+                                                  input$file$name[i]))),
+                             renderDataTable(results()[[i]]),
+                             hr(),
+                             h4(renderText('Mean values')),
+                             renderTable(results()[[i]] %>%
+                                           group_by(Index) %>%
+                                           summarize(Vertex = mean(Vertex),
+                                                     Edge = mean(Edge))),
+                             style = 'padding:1em'),
+                   select = i == 1)
+      })
+      
+      nav_remove('results', 'Processing...')
     }
+  })
+  
+  networks = reactive({
+    req(data())
+    
+    # Create the network files for download
+    lapply(data(), function(d) {
+      # Use words stems as vertices
+      stems = d$stem %>% unique()
+      edgelist = d %>%
+        select(clique_id, stem) %>%
+        mutate(Source = match(stem, stems),
+               Target = Source) %>%
+        group_by(clique_id) %>%
+        # Create edge list for a network of cliques
+        expand(Source, Target) %>%
+        # Remove self loops
+        filter(Source != Target) %>%
+        mutate(edge_id = mapply(function(s, t) {
+          sort(c(s, t)) %>%
+            paste(collapse = '_')
+        },
+        Source, Target)) %>%
+        ungroup() %>%
+        # Remove mutual edges
+        distinct(edge_id, .keep_all = T) %>%
+        select(Source, Target)
+      
+      # Create string in Pajek NET format
+      "*Vertices " %>%
+        str_c(stems %>% length(), '\n') %>%
+        str_c(paste0(1:length(stems), ' "', stems, '"', collapse = '\n'),
+              '\n') %>%
+        str_c('*Edges\n') %>%
+        str_c(paste(edgelist$Source, edgelist$Target, collapse = '\n'))
+    })
+  })
+  
+  output$download_processed_texts = downloadHandler(
+    filename = function(){
+      paste("processed_texts_", Sys.Date(), ".zip", sep = "")
+    },
+    content = function(file){
+      temp_directory = file.path(tempdir(), as.integer(Sys.time()))
+      dir.create(temp_directory)
+      
+      data() %>%
+        imap(function(x,y){
+          if(!is.null(x)){
+            file_name = paste0(str_sub(input$file$name[y], 0, -5), '_data.xlsx')
+            write.xlsx(x, file.path(temp_directory, file_name))
+          }
+        })
+      
+      zip::zip(
+        zipfile = file,
+        files = dir(temp_directory),
+        root = temp_directory
+      )
+    },
+    contentType = "application/zip"
   )
-
-  # Prepare the XLSX file with the processed text data
-  output$download_data_xlsx = downloadHandler(
-    filename = function() {
-      'Processed text ' %>%
-        str_c(
-          selectedTextFileName() %>%
-            str_sub(18, -5) %>%
-            str_c('.xlsx')
-        )
+  
+  output$download_results_cliques = downloadHandler(
+    filename = function(){
+      paste("results_", Sys.Date(), ".zip", sep = "")
     },
-    content = function(file) {
-      write.xlsx(data(), file, rowNames = F)
-    }
+    content = function(file){
+      temp_directory = file.path(tempdir(), as.integer(Sys.time()))
+      dir.create(temp_directory)
+      
+      results() %>%
+        imap(function(x,y){
+          if(!is.null(x)){
+            file_name = paste0(str_sub(input$file$name[y], 0, -5),
+                               '_cohesion_indices.xlsx')
+            write.xlsx(x, file.path(temp_directory, file_name))
+          }
+        })
+      
+      zip::zip(
+        zipfile = file,
+        files = dir(temp_directory),
+        root = temp_directory
+      )
+    },
+    contentType = "application/zip"
   )
-
-  # Prepare the CSV file with the complete results data
-  output$download_results_csv = downloadHandler(
-    filename = function() {
-      selectedTextFileName() %>%
-        str_sub(1, -5) %>%
-        str_c('.csv')
+  
+  output$download_networks = downloadHandler(
+    filename = function(){
+      paste("networks_", Sys.Date(), ".zip", sep = "")
     },
-    content = function(file) {
-      write.csv(results(), file, row.names = F)
-    }
-  )
-
-  # Prepare the XLS file with the complete results data
-  output$download_results_xlsx = downloadHandler(
-    filename = function() {
-      selectedTextFileName() %>%
-        str_sub(1, -5) %>%
-        str_c('.xlsx')
+    content = function(file){
+      temp_directory = file.path(tempdir(), as.integer(Sys.time()))
+      dir.create(temp_directory)
+      
+      networks() %>%
+        imap(function(x,y){
+          if(!is.null(x)){
+            file_name = paste0(str_sub(input$file$name[y], 0, -5), '.net')
+            write_file(x, file.path(temp_directory, file_name))
+          }
+        })
+      
+      zip::zip(
+        zipfile = file,
+        files = dir(temp_directory),
+        root = temp_directory
+      )
     },
-    content = function(file) {
-      write.xlsx(results(), file, rowNames = F)
-    }
-  )
-
-  # Prepare the Pajek NET file with the network data
-  output$download_network_net = downloadHandler(
-    filename = function() {
-      'Network for ' %>%
-        str_c(
-          selectedTextFileName() %>%
-            str_sub(18, -5) %>%
-            str_c('.net')
-        )
-    },
-    content = function(file) {
-      write_file(network(), file)
-    }
+    contentType = "application/zip"
   )
 }
 
 # Run the app ------------------------------------------------------------------
 shinyApp(ui = ui, server = server)
-
-################################################################################
-# CODEOCEAN REPRODUCIBILITY CODE                                               #
-################################################################################
-# NOTICE: For reproducibility, the Shiny code is commented and the steps for
-# computing the indices are available below. A sample text is used to 
-# demonstrate how the indices are calculated.
-# reproducibility_text = read_file(
-#   'reproducibility_oliveira_senna_pereira_text1.txt') %>%
-#   # Parse with udpipe
-#   udpipe_parsing(model, synonyms_hypernyms)
-# 
-# # Combine the results into a single tibble
-# reproducibility_indices = global_backward_cohesion(reproducibility_text) %>%
-#   select(clique_id, v, e) %>%
-#   # Identify the index
-#   mutate(index = 'Global Backward Cohesion') %>%
-#   bind_rows(
-#     local_backward_cohesion(reproducibility_text) %>%
-#       select(clique_id, v, e) %>%
-#       # Identify the index
-#       mutate(index = 'Local Backward Cohesion')
-#   ) %>%
-#   bind_rows(
-#     mean_pairwise_cohesion(reproducibility_text) %>%
-#       select(clique_id, v, e) %>%
-#       # Identify the index
-#       mutate(index = 'Mean Pairwise Cohesion')
-#   ) %>%
-#   rename(Index = index,
-#          `Clique ID` = clique_id,
-#          Vertex = v,
-#          Edge = e) %>%
-#   select(Index, `Clique ID`, Vertex, Edge)
-# 
-# # Use words stems as vertices
-# reproducibility_stems = reproducibility_text$stem %>% unique()
-# reproducibility_edgelist = reproducibility_text %>%
-#   select(clique_id, stem) %>%
-#   mutate(Source = match(stem, reproducibility_stems),
-#          Target = Source) %>%
-#   group_by(clique_id) %>%
-#   # Create edge list for a network of cliques
-#   expand(Source, Target) %>%
-#   # Remove self loops
-#   filter(Source != Target) %>%
-#   mutate(edge_id = mapply(function(s, t) {
-#     sort(c(s, t)) %>%
-#       paste(collapse = '_')
-#   },
-#   Source, Target)) %>%
-#   ungroup() %>%
-#   # Remove mutual edges
-#   distinct(edge_id, .keep_all = T) %>%
-#   select(Source, Target)
-# 
-# # Create string in Pajek NET format
-# reproducibility_network = "*Vertices " %>%
-#   str_c(reproducibility_stems %>% length(), '\n') %>%
-#   str_c(paste0(1:length(reproducibility_stems), 
-#                ' "', 
-#                reproducibility_stems, 
-#                '"', 
-#                collapse = '\n'), 
-#         '\n') %>%
-#   str_c('*Edges\n') %>%
-#   str_c(paste(reproducibility_edgelist$Source, 
-#               reproducibility_edgelist$Target, 
-#               collapse = '\n'))
-# 
-# # Write reproducibility results
-# write.csv(reproducibility_text, 
-#           '/results/Processed text.csv', 
-#           row.names = F)
-# write.xlsx(reproducibility_text, 
-#            '/results/Processed text.xlsx', 
-#            rowNames = F)
-# write.csv(reproducibility_indices, 
-#           '/results/Complete results.csv', 
-#           row.names = F)
-# write.xlsx(reproducibility_indices, 
-#            '/results/Complete results.xlsx', 
-#            rowNames = F)
-# write_file(reproducibility_network, '/results/Network.net')

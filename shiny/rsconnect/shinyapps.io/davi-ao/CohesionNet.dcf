@@ -1,0 +1,13 @@
+name: CohesionNet
+title: CohesionNet
+username: davi-ao
+account: davi-ao
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 11948328
+bundleId: 8584491
+url: https://davi-ao.shinyapps.io/CohesionNet/
+version: 1
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: reproducibility_2012_portugues_q98_t1.txt|reproducibility_oliveira_senna_pereira_text1.txt
