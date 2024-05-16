@@ -145,7 +145,7 @@ let errorSplashScreen
 const createWindow = (shinyUrl) => {
     mainWindow = new BrowserWindow({
         width: 1200,
-        height: 850,
+        height: 1000,
         show: false,
         webPreferences: {
             nodeIntegration: false,

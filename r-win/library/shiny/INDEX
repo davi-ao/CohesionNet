@@ -1,3 +1,5 @@
+ExtendedTask            Task or computation that proceeds in the
+                        background
 MockShinySession        Mock Shiny Session
 NS                      Namespaced IDs for inputs/outputs
 Progress                Reporting progress (object-oriented API)
@@ -21,8 +23,6 @@ column                  Create a column within a UI definition
 conditionalPanel        Conditional Panel
 createRenderFunction    Implement custom render functions
 createWebDependency     Create a web dependency
-dataTableOutput         Table output with the JavaScript DataTables
-                        library
 dateInput               Create date input
 dateRangeInput          Create date range input
 debounce                Slow down a reactive expression with

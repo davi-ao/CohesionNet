@@ -16,6 +16,10 @@
 # install.packages('SnowballC')
 # install.packages('openxlsx')
 # install.packages('shinyWidgets')
+# install.packages("remotes")
+# remotes::install_github("daattali/shinycssloaders")
+# install.packages('bslib')
+# install.packages('DT')
 
 # Load the necessary packages --------------------------------------------------
 library(shiny)
@@ -24,6 +28,7 @@ library(udpipe)
 library(SnowballC)
 library(openxlsx)
 library(shinyWidgets)
+library(shinycssloaders)
 library(bslib)
 library(DT)
 
@@ -42,22 +47,22 @@ ui = page_sidebar(
   title = 'CohesionNet',
   sidebar = sidebar(
     width = '400px',
-    fileInput('file', label = h4('Select text files'), multiple = T),
+    fileInput('file', label = 'Select text files', multiple = T),
     selectInput('language', 
-                label = h4('Select the language'),
+                label = 'Language',
                 choices = list('English' = 1, 
                                'Portuguese' = 2, 
                                'Spanish' = 3)),
-    actionButton('analyze', label = 'Run analysis', icon = icon('play')),
-    helpText(h5('Instructions')),
-    helpText('Click on the \'Browse...\' button to select a .txt file for
-               analysis. Ensure the file contains a single text and that [.:?!…]
-               are used exclusively as sentence delimiters. Replace any other
-               # uses of these characters with different ones; for instance
-               replace decimal separators like in "1.5" with underscores, making
-               it "1_5".'),
-    helpText(h5('References')),
-    helpText('Please, cite the following work when using this app: Oliveira, D. 
+    selectInput('vertex_type',
+                label = 'Vertex type',
+                choices = list('token', 'word', 'lemma', 'stem'),
+                selected = 'stem'),
+    checkboxInput('lexical', 'Keep only lexical tokens', T),
+    actionButton('analyze', 
+                 label = 'Run analysis', 
+                 icon = icon('play'), 
+                 disabled = T),
+    helpText('Please, cite the following article when using this app: Oliveira, D. 
               A., Senna, V., & Pereira, H. B. B. (2024). Indices of Textual 
               Cohesion by Lexical Repetition Based on Semantic Networks of 
               Cliques. Expert Systems with Applications, 237(2024), 121580. 
@@ -65,7 +70,36 @@ ui = page_sidebar(
   ),
   navset_card_tab(
     id = 'results',
-    title = 'Results'
+    nav_panel('Instructions', 
+              div(
+                p('Click on the \'Browse...\' button to select at least one
+                  .txt file for analysis. Ensure the file contains a single text 
+                  and that [.:?!…] are used exclusively as sentence delimiters. 
+                  Replace any other uses of these characters with different 
+                  ones; for instance replace decimal separators like in "1.5" 
+                  with underscores, making it "1_5".'),
+                p('Select the language of the texts.'),
+                p('Select the vertex type. The type "token" includes all set of
+                  characters delimited by a whitespace. The type "word" includes
+                  all tokens except those identified as punctuation marks. The
+                  type "lemma" includes only unique lemmatized words (i.e., 
+                  words with inflections removed). The type "stem" includes only
+                  unique stemmed lemmas.'),
+                p('The option "Keep only lexical tokens" removes all tokens that
+                  are not identified as nouns, adjectives, verbs or adverbs.'),
+                p('After setting the appropriate values for these settings, 
+                  click the "Run analysis" button. Long texts may take several 
+                  minutes to process.')
+              ), 
+              style = 'padding:1em'),
+    nav_panel('Error',
+              value = 'error1',
+              div(p('You must select at least one text file.'),
+                  style = 'padding:1em;color:red')),
+    nav_panel('Error',
+              value = 'error2',
+              div(p('Invalid file: files must be plain texts.'),
+                  style = 'padding:1em;color:red'))
   ),
   div(
     downloadButton('download_processed_texts',
@@ -82,17 +116,14 @@ ui = page_sidebar(
 
 # Define server logic ----------------------------------------------------------
 server = function(input, output, session) {
+  nav_hide('results', 'error1')
+  nav_hide('results', 'error2')
+  
   data = reactive({
-    validate(
-      need(input$file, 'You must select a text file.'),
-      need(input$file$type[1] == 'text/plain',
-           'Invalid file: file must be plain text.')
-    )
-    
     lapply(input$file$datapath, function(path) {
       read_file(path) %>%
         # Parse with udpipe
-        udpipe_parsing(input$language)
+        udpipe_parsing(input$language, input$lexical, input$vertex_type)
     })
   })
   
@@ -124,58 +155,55 @@ server = function(input, output, session) {
     })
   })
   
-  observeEvent(input$analyze, {
-    req(data())
-    req(results())
-    
-    nav_remove('results', 'Error')
-    
-    if(is.null(input$file)) {
-      nav_insert('results', 
-                 nav_panel('Error',
-                           div(p('You must select at least one text file.')), 
-                           style = 'padding:1em;color:red'),
-                 select = T)
+  observeEvent(input$file, {
+    if (is.null(input$file)) {
+      nav_show('results', 'error1', T)
+      hidePageSpinner()
+      validate(F)
     } else if (!(input$file$type == 'text/plain') %>% all()) {
-      nav_insert('results', 
-                 nav_panel('Error',
-                           div(p('Files must be in .txt format')), 
-                           style = 'padding:1em;color:red'),
-                 select = T)
+      nav_show('results', 'error2', T)
+      hidePageSpinner()
+      validate(F)
     } else {
-      nav_insert('results', 
-                 nav_panel('Processing...',
-                           div(p('Parsing texts...')), 
-                           style = 'padding:1em'),
-                 select = T)
-      
-      lapply(1:length(results()), function(i) {
-        nav_remove('results', paste('Text', i))
-        
-        nav_insert('results', 
-                   nav_panel(paste('Text', i),
-                             h4(renderText(paste('Results for', 
-                                                  input$file$name[i]))),
-                             renderDataTable(results()[[i]]),
-                             hr(),
-                             h4(renderText('Mean values')),
-                             renderTable(results()[[i]] %>%
-                                           group_by(Index) %>%
-                                           summarize(Vertex = mean(Vertex),
-                                                     Edge = mean(Edge))),
-                             style = 'padding:1em'),
-                   select = i == 1)
-      })
-      
-      nav_remove('results', 'Processing...')
+      nav_hide('results', 'error1')
+      nav_hide('results', 'error2')
+      updateActionButton(inputId = 'analyze', disabled = F)
     }
   })
   
+  observeEvent(input$analyze, {
+    showPageSpinner()
+    nav_hide('results', 'Instructions')
+    
+    req(results())
+    
+    lapply(1:length(results()), function(i) {
+      nav_remove('results', paste('Text', i))
+      
+      nav_insert('results', 
+                 nav_panel(paste('Text', i),
+                           h4(renderText(paste('Results for', 
+                                                input$file$name[i]))),
+                           renderDataTable(results()[[i]]),
+                           hr(),
+                           h4(renderText('Mean values')),
+                           renderTable(results()[[i]] %>%
+                                         group_by(Index) %>%
+                                         summarize(Vertex = mean(Vertex),
+                                                   Edge = mean(Edge))),
+                           style = 'padding:1em'),
+                 select = i == 1)
+    })
+    
+    hidePageSpinner()
+  })
+  
   networks = reactive({
+    showPageSpinner()
     req(data())
     
     # Create the network files for download
-    lapply(data(), function(d) {
+    networks = lapply(data(), function(d) {
       # Use words stems as vertices
       stems = d$stem %>% unique()
       edgelist = d %>%
@@ -205,6 +233,9 @@ server = function(input, output, session) {
         str_c('*Edges\n') %>%
         str_c(paste(edgelist$Source, edgelist$Target, collapse = '\n'))
     })
+    
+    hidePageSpinner()
+    networks
   })
   
   output$download_processed_texts = downloadHandler(
