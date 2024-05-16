@@ -11,7 +11,7 @@ This app is an improvement over the script on which it was based because it can 
 Oliveira, D. A., Senna, V., & Pereira, H. B. B. (2024). Indices of textual cohesion by lexical repetition based on semantic networks of cliques. <em>Expert Systems with Applications</em>, 237, 121580. https://doi.org/10.1016/j.eswa.2023.121580
 
 ## License
-Copyright 2023 Davi Alves Oliveira
+Copyright 2024 Davi Alves Oliveira
 
 Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with the License.
 You may obtain a copy of the License at
