@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11206287.svg)](https://doi.org/10.5281/zenodo.11206287)
+
 # CohesionNet
 Software for Network-Based Textual Cohesion Analysis
 
