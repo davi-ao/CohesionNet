@@ -10,7 +10,7 @@ The app was based on the script available at https://doi.org/10.24433/CO.0568085
 This app is an improvement over the script on which it was based because it can be used with any English text, provided it was manually cleaned, and uses a Shiny graphical user interface to facilitate the process of calculating the cohesion indices. Manual cleaning is necessary to ensure that the file to be processed contains a single text and that the caracters [.:?!…] are used exclusively as sentence delimiters. The process of manual cleaning must replace any other uses of these characters with different ones; for instance replacing decimal separators like in "1.5" with underscores, making it "1_5". Additionally, the app uses a different udpipe model to parse the text, with improved performance in universal part of speech tagging and lemmatization.
 
 ## How to cite
-Oliveira, D. A. (2024). CohesionNet (v2.1.1). Zenodo. https://doi.org/10.5281/zenodo.11206287
+Oliveira, D. A., & Pereira, H. B. B. (2024). CohesionNet (v2.1.1). Zenodo. https://doi.org/10.5281/zenodo.11206287
 
 Oliveira, D. A., Senna, V., & Pereira, H. B. B. (2024). Indices of textual cohesion by lexical repetition based on semantic networks of cliques. <em>Expert Systems with Applications</em>, 237, 121580. https://doi.org/10.1016/j.eswa.2023.121580
 
