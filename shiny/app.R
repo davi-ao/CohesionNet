@@ -20,6 +20,7 @@
 # remotes::install_github("daattali/shinycssloaders")
 # install.packages('bslib')
 # install.packages('DT')
+# install.packages('igraph')
 
 # Load the necessary packages --------------------------------------------------
 library(shiny)
@@ -31,12 +32,15 @@ library(shinyWidgets)
 library(shinycssloaders)
 library(bslib)
 library(DT)
+library(igraph)
 
 # Load local dependencies ------------------------------------------------------
 # Cohesion funcions
-source('cohesion_functions.R')
+source('cohesion_indices_functions.R')
 # Udpipe parsing function
 source('udpipe_parsing_function.R')
+# Create network function
+source('create_network_function.R')
 
 ################################################################################
 # SHINY CODE                                                                   #
@@ -52,11 +56,21 @@ ui = page_sidebar(
                 label = 'Language',
                 choices = list('English' = 1, 
                                'Portuguese' = 2, 
-                               'Spanish' = 3)),
+                               'Spanish' = 3),
+                selected = 1),
     selectInput('vertex_type',
-                label = 'Vertex type',
-                choices = list('token', 'word', 'lemma', 'stem'),
-                selected = 'stem'),
+                label = 'Vertex definition',
+                choices = list('token' = 1, 
+                               'word' = 2,
+                               'lemma' = 3,
+                               'stem' = 4),
+                selected = 4),
+    selectInput('edge_type',
+                label = 'Segment representation',
+                choices = list('line' = 1, 
+                               'clique' = 2,
+                               'dependency-based' = 3),
+                selected = 3),
     checkboxInput('lexical', 'Keep only lexical tokens', T),
     actionButton('analyze', 
                  label = 'Run analysis', 
@@ -73,18 +87,25 @@ ui = page_sidebar(
     nav_panel('Instructions', 
               div(
                 p('Click on the \'Browse...\' button to select at least one
-                  .txt file for analysis. Ensure the file contains a single text 
-                  and that [.:?!…] are used exclusively as sentence delimiters. 
-                  Replace any other uses of these characters with different 
-                  ones; for instance replace decimal separators like in "1.5" 
-                  with underscores, making it "1_5".'),
-                p('Select the language of the texts.'),
-                p('Select the vertex type. The type "token" includes all set of
-                  characters delimited by a whitespace. The type "word" includes
-                  all tokens except those identified as punctuation marks. The
-                  type "lemma" includes only unique lemmatized words (i.e., 
-                  words with inflections removed). The type "stem" includes only
+                  .txt file for analysis. Ensure the file contains a single 
+                  text. Precision can be improved if [.:?!…] are used 
+                  exclusively as sentence delimiters. You may any other uses of 
+                  these characters with different ones; for instance replace 
+                  decimal separators like in "1.5" with underscores, making it 
+                  "1_5".'),
+                p('Select the language of the texts. Currently, Spanish and 
+                  Portuguese are limited to vertex cohesion indices.'),
+                p('Select the vertex definition. The definition "token" includes 
+                  all sets of characters delimited by a whitespace. The 
+                  definition "word" includes all tokens except those identified 
+                  as punctuation marks. The definition "lemma" includes only 
+                  unique lemmatized words. The definition "stem" includes only 
                   unique stemmed lemmas.'),
+                p('Select the segment representation. The "line" representation
+                  connects each consecutive token in a sentence. The "clique" 
+                  representation connects every token in a sentence with each 
+                  other. The "dependecy-based" representation creates a tree of
+                  dependency relations for each sentence.'),
                 p('The option "Keep only lexical tokens" removes all tokens that
                   are not identified as nouns, adjectives, verbs or adverbs.'),
                 p('After setting the appropriate values for these settings, 
@@ -105,7 +126,7 @@ ui = page_sidebar(
     downloadButton('download_processed_texts',
                    'Processed texts (.xlsx)',
                    icon = icon('download')),
-    downloadButton('download_results_cliques',
+    downloadButton('download_results',
                    'Results (.xlsx)',
                    icon = icon('download')),
     downloadButton('download_networks',
@@ -119,39 +140,69 @@ server = function(input, output, session) {
   nav_hide('results', 'error1')
   nav_hide('results', 'error2')
   
+  observeEvent(input$analyze, {
+    showPageSpinner()
+    nav_hide('results', 'Instructions')
+    
+    req(results())
+    
+    print(results())
+    
+    # lapply(1:length(results()), function(i) {
+    #   nav_remove('results', paste('Text', i))
+    #   
+    #   nav_insert('results', 
+    #              nav_panel(paste('Text', i),
+    #                        h4(renderText(paste('Results for', 
+    #                                             input$file$name[i]))),
+    #                        renderDataTable(results()[[i]]),
+    #                        hr(),
+    #                        h4(renderText('Mean values')),
+    #                        renderTable(results()[[i]] %>%
+    #                                      group_by(Index) %>%
+    #                                      summarize(Vertex = mean(Vertex),
+    #                                                Edge = mean(Edge))),
+    #                        style = 'padding:1em'),
+    #              select = i == 1)
+    # })
+    
+    hidePageSpinner()
+  })
+  
+  results = reactive({
+    req(networks())
+    
+    # English -nyms networks
+    nyms = switch(input$vertex_type,
+                  '1' = read_graph('./english_nyms_lemmas.net', 'pajek'),
+                  '2' = read_graph('./english_nyms_lemmas.net', 'pajek'),
+                  '3' = read_graph('./english_nyms_lemmas.net', 'pajek'),
+                  '4' = read_graph('./english_nyms_stems.net', 'pajek'))
+     
+    lapply(networks(), function(d) {
+      global_indices = calculate_global_cohesion(d$segments, d$G_next, nyms)
+      local_indices = calculate_local_cohesion(d$segments, nyms)
+      pairwise_indices = calculate_pairwise_cohesion(d$segments, nyms)
+      
+      global_indices %>%
+        bind_rows(local_indices) %>%
+        bind_rows(pairwise_indices)
+    })
+  })
+  
+  networks = reactive({
+    req(data())
+
+    lapply(data(), function(d) {
+      create_network(d, input$lexical, input$vertex_type, input$edge_type)
+    })
+  })
+  
   data = reactive({
     lapply(input$file$datapath, function(path) {
       read_file(path) %>%
         # Parse with udpipe
-        udpipe_parsing(input$language, input$lexical, input$vertex_type)
-    })
-  })
-  
-  results = reactive({
-    req(data())
-    
-    lapply(data(), function(d) {
-      indices = global_backward_cohesion(d) %>%
-        select(clique_id, v, e) %>%
-        # Identify the index
-        mutate(index = 'Global Backward Cohesion') %>%
-        bind_rows(
-          local_backward_cohesion(d) %>%
-            select(clique_id, v, e) %>%
-            # Identify the index
-            mutate(index = 'Local Backward Cohesion')
-        ) %>%
-        bind_rows(
-          mean_pairwise_cohesion(d) %>%
-            select(clique_id, v, e) %>%
-            # Identify the index
-            mutate(index = 'Mean Pairwise Cohesion')
-        ) %>%
-        rename(Index = index,
-               `Clique ID` = clique_id,
-               Vertex = v,
-               Edge = e) %>%
-        select(Index, `Clique ID`, Vertex, Edge)
+        udpipe_parsing(input$language, input$lexical)
     })
   })
   
@@ -171,71 +222,17 @@ server = function(input, output, session) {
     }
   })
   
-  observeEvent(input$analyze, {
+  network_files = reactive({
     showPageSpinner()
-    nav_hide('results', 'Instructions')
-    
-    req(results())
-    
-    lapply(1:length(results()), function(i) {
-      nav_remove('results', paste('Text', i))
-      
-      nav_insert('results', 
-                 nav_panel(paste('Text', i),
-                           h4(renderText(paste('Results for', 
-                                                input$file$name[i]))),
-                           renderDataTable(results()[[i]]),
-                           hr(),
-                           h4(renderText('Mean values')),
-                           renderTable(results()[[i]] %>%
-                                         group_by(Index) %>%
-                                         summarize(Vertex = mean(Vertex),
-                                                   Edge = mean(Edge))),
-                           style = 'padding:1em'),
-                 select = i == 1)
-    })
-    
-    hidePageSpinner()
-  })
-  
-  networks = reactive({
-    showPageSpinner()
-    req(data())
+    req(networks())
     
     # Create the network files for download
-    networks = lapply(data(), function(d) {
-      # Use words stems as vertices
-      stems = d$stem %>% unique()
-      edgelist = d %>%
-        select(clique_id, stem) %>%
-        mutate(Source = match(stem, stems),
-               Target = Source) %>%
-        group_by(clique_id) %>%
-        # Create edge list for a network of cliques
-        expand(Source, Target) %>%
-        # Remove self loops
-        filter(Source != Target) %>%
-        mutate(edge_id = mapply(function(s, t) {
-          sort(c(s, t)) %>%
-            paste(collapse = '_')
-        },
-        Source, Target)) %>%
-        ungroup() %>%
-        # Remove mutual edges
-        distinct(edge_id, .keep_all = T) %>%
-        select(Source, Target)
-      
-      # Create string in Pajek NET format
-      "*Vertices " %>%
-        str_c(stems %>% length(), '\n') %>%
-        str_c(paste0(1:length(stems), ' "', stems, '"', collapse = '\n'),
-              '\n') %>%
-        str_c('*Edges\n') %>%
-        str_c(paste(edgelist$Source, edgelist$Target, collapse = '\n'))
+    files = lapply(networks(), function(d) {
+      # TODO Create vertex and edge files
     })
     
     hidePageSpinner()
-    networks
+    files
   })
   
   output$download_processed_texts = downloadHandler(
@@ -263,7 +260,7 @@ server = function(input, output, session) {
     contentType = "application/zip"
   )
   
-  output$download_results_cliques = downloadHandler(
+  output$download_results = downloadHandler(
     filename = function(){
       paste("results_", Sys.Date(), ".zip", sep = "")
     },
@@ -297,9 +294,10 @@ server = function(input, output, session) {
       temp_directory = file.path(tempdir(), as.integer(Sys.time()))
       dir.create(temp_directory)
       
-      networks() %>%
+      network_files() %>%
         imap(function(x,y){
           if(!is.null(x)){
+            # TODO change to vertex and edge files in CSV
             file_name = paste0(str_sub(input$file$name[y], 0, -5), '.net')
             write_file(x, file.path(temp_directory, file_name))
           }
