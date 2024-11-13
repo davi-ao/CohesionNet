@@ -130,7 +130,7 @@ ui = page_sidebar(
                    'Results (.xlsx)',
                    icon = icon('download')),
     downloadButton('download_networks',
-                   'Networks (.net)',
+                   'Networks (.xlsx)',
                    icon = icon('download'))
   )
 )
@@ -140,31 +140,45 @@ server = function(input, output, session) {
   nav_hide('results', 'error1')
   nav_hide('results', 'error2')
   
+  observeEvent(input$file, {
+    if (is.null(input$file)) {
+      nav_show('results', 'error1', T)
+      hidePageSpinner()
+      validate(F)
+    } else if (!(input$file$type == 'text/plain') %>% all()) {
+      nav_show('results', 'error2', T)
+      hidePageSpinner()
+      validate(F)
+    } else {
+      nav_hide('results', 'error1')
+      nav_hide('results', 'error2')
+      updateActionButton(inputId = 'analyze', disabled = F)
+    }
+  })
+  
   observeEvent(input$analyze, {
     showPageSpinner()
     nav_hide('results', 'Instructions')
     
     req(results())
     
-    print(results())
-    
-    # lapply(1:length(results()), function(i) {
-    #   nav_remove('results', paste('Text', i))
-    #   
-    #   nav_insert('results', 
-    #              nav_panel(paste('Text', i),
-    #                        h4(renderText(paste('Results for', 
-    #                                             input$file$name[i]))),
-    #                        renderDataTable(results()[[i]]),
-    #                        hr(),
-    #                        h4(renderText('Mean values')),
-    #                        renderTable(results()[[i]] %>%
-    #                                      group_by(Index) %>%
-    #                                      summarize(Vertex = mean(Vertex),
-    #                                                Edge = mean(Edge))),
-    #                        style = 'padding:1em'),
-    #              select = i == 1)
-    # })
+    lapply(1:length(results()), function(i) {
+      nav_remove('results', paste('Text', i))
+
+      nav_insert('results',
+                 nav_panel(paste('Text', i),
+                           h4(renderText(paste('Results for',
+                                                input$file$name[i]))),
+                           renderDataTable(results()[[i]]),
+                           hr(),
+                           h4(renderText('Mean values')),
+                           renderTable(results()[[i]] %>%
+                                         group_by(Index) %>%
+                                         summarize(Vertex = mean(Vertex),
+                                                   Edge = mean(Edge))),
+                           style = 'padding:1em'),
+                 select = i == 1)
+    })
     
     hidePageSpinner()
   })
@@ -179,14 +193,18 @@ server = function(input, output, session) {
                   '3' = read_graph('./english_nyms_lemmas.net', 'pajek'),
                   '4' = read_graph('./english_nyms_stems.net', 'pajek'))
      
-    lapply(networks(), function(d) {
-      global_indices = calculate_global_cohesion(d$segments, d$G_next, nyms)
-      local_indices = calculate_local_cohesion(d$segments, nyms)
-      pairwise_indices = calculate_pairwise_cohesion(d$segments, nyms)
+    lapply(networks(), function(G) {
+      global_indices = calculate_global_cohesion(G$segments, G$G_next, nyms)
+      local_indices = calculate_local_cohesion(G$segments, nyms)
+      pairwise_indices = calculate_pairwise_cohesion(G$segments, nyms)
       
       global_indices %>%
         bind_rows(local_indices) %>%
-        bind_rows(pairwise_indices)
+        bind_rows(pairwise_indices) %>%
+        rename(Segment = segment,
+               Index = index,
+               Vertex = v,
+               Edge = e)
     })
   })
   
@@ -206,29 +224,14 @@ server = function(input, output, session) {
     })
   })
   
-  observeEvent(input$file, {
-    if (is.null(input$file)) {
-      nav_show('results', 'error1', T)
-      hidePageSpinner()
-      validate(F)
-    } else if (!(input$file$type == 'text/plain') %>% all()) {
-      nav_show('results', 'error2', T)
-      hidePageSpinner()
-      validate(F)
-    } else {
-      nav_hide('results', 'error1')
-      nav_hide('results', 'error2')
-      updateActionButton(inputId = 'analyze', disabled = F)
-    }
-  })
-  
   network_files = reactive({
     showPageSpinner()
     req(networks())
     
     # Create the network files for download
-    files = lapply(networks(), function(d) {
-      # TODO Create vertex and edge files
+    files = lapply(networks(), function(G) {
+      G$network %>%
+        igraph::as_data_frame('both')
     })
     
     hidePageSpinner()
@@ -297,9 +300,9 @@ server = function(input, output, session) {
       network_files() %>%
         imap(function(x,y){
           if(!is.null(x)){
-            # TODO change to vertex and edge files in CSV
-            file_name = paste0(str_sub(input$file$name[y], 0, -5), '.net')
-            write_file(x, file.path(temp_directory, file_name))
+            file_name = paste0(str_sub(input$file$name[y], 0, -5), 
+                               '_network.xlsx')
+            write.xlsx(x, file.path(temp_directory, file_name))
           }
         })
       
