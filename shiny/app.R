@@ -21,6 +21,7 @@
 # install.packages('bslib')
 # install.packages('DT')
 # install.packages('igraph')
+# install.packages('shinyjs')
 
 # Load the necessary packages --------------------------------------------------
 library(shiny)
@@ -33,6 +34,7 @@ library(shinycssloaders)
 library(bslib)
 library(DT)
 library(igraph)
+library(shinyjs)
 
 # Load local dependencies ------------------------------------------------------
 # Cohesion funcions
@@ -51,7 +53,14 @@ ui = page_sidebar(
   title = 'CohesionNet',
   sidebar = sidebar(
     width = '400px',
-    fileInput('file', label = 'Select text files', multiple = T),
+    useShinyjs(),
+    div(id = 'fileInput', 
+        fileInput('file', label = 'Select text files', multiple = T)),
+    div(id = 'reset',
+        actionButton('reset', 
+                     label = 'Analyze other texts', 
+                     icon = icon('rotate')),
+        style = 'display: none'),
     selectInput('language', 
                 label = 'Language',
                 choices = list('English' = 1, 
@@ -180,7 +189,14 @@ server = function(input, output, session) {
                  select = i == 1)
     })
     
+    hide('fileInput')
+    show('reset')
+    updateActionButton(inputId = 'analyze', disabled = T)
     hidePageSpinner()
+  })
+  
+  observeEvent(input$reset, {
+    session$reload()
   })
   
   results = reactive({
