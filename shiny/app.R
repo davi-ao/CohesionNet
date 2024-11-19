@@ -2,10 +2,9 @@
 # Analyze indices of textual cohesion of an English text using semantic networks
 # of cliques with a Shiny GUI
 #
-# Authors: Davi Alves Oliveira, Valter de Senna, and Hernane Borges de Barros 
-# Pereira
+# Authors: Davi Alves Oliveira and Hernane Borges de Barros Pereira
 #
-# Last update: November 30, 2023
+# Last update: November 19, 2024
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -246,8 +245,23 @@ server = function(input, output, session) {
     
     # Create the network files for download
     files = lapply(networks(), function(G) {
-      G$network %>%
-        igraph::as_data_frame('both')
+      vertices = G$network %>%
+        igraph::as_data_frame('vertices') %>%
+        rename(Id = id,
+               Label = name,
+               Timestamp = segments) %>%
+        select(Id, Label, Timestamp)
+      
+      edges = G$network %>%
+        igraph::as_data_frame('edges') %>%
+        rename(Source = from,
+               Target = to,
+               CohesionEdge = cohesion_edge) %>%
+        mutate(Type = "Undirected",
+               CohesionEdge = CohesionEdge %>% as.numeric()) %>%
+        select(Source, Target, Type, CohesionEdge)
+      
+      list(Vertices = vertices, Edges = edges)
     })
     
     hidePageSpinner()
