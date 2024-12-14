@@ -1,12 +1,26 @@
+# textshaping 0.4.1
+
+* Make compiled code somewhat less assumptive about the correctness of the input
+* Fix a bug from too agressive early exiting shaping of strings with no max
+  width (#45)
+* Fixed a mismatch between the default values of the `width` argument in
+  `shape_text()` and `systemfonts::match_fonts()` (#44)
+* Updated `text_width()` to take the same inputs as `shape_text()`
+
+# textshaping 0.4.0
+
+* Full rewrite of `shape_text()` to allow proper font-fallback, bidi text
+  support, support for font-features, spacers, new align settings, etc.
+
 # textshaping 0.3.7
 
 * Prepare for Arm Windows
 
 # textshaping 0.3.6
 
-* Fix a bug in fallback font loading which would crash the process if the font 
+* Fix a bug in fallback font loading which would crash the process if the font
   failed to load (#23)
-* Fixed bug that would reset fallback to the original font for short strings 
+* Fixed bug that would reset fallback to the original font for short strings
   (#25)
 
 # textshaping 0.3.5
@@ -56,5 +70,5 @@
 
 # textshaping 0.1.0
 
-* First release. Provide access to HarfBuzz shaping and FriBidi bidirectional 
+* First release. Provide access to HarfBuzz shaping and FriBidi bidirectional
   script support.

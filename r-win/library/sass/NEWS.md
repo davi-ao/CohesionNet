@@ -1,3 +1,11 @@
+# sass 0.4.9
+
+- Closed #138: font_google(local = TRUE) now uses woff2 (instead of woff) for a font file type. (#139) 
+
+# sass 0.4.8
+
+- Closed #132: Fix R CMD check warning re error() format strings (for r-devel). (#133)
+
 # sass 0.4.7
 
 - Closed #129: Fixed a compilation warning on latest Apple Clang (15). (#130)

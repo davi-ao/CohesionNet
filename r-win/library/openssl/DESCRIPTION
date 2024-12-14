@@ -2,8 +2,8 @@ Package: openssl
 Type: Package
 Title: Toolkit for Encryption, Signatures and Certificates Based on
         OpenSSL
-Version: 2.1.1
-Authors@R: c(person("Jeroen", "Ooms", role = c("aut", "cre"), email = "jeroen@berkeley.edu",
+Version: 2.2.2
+Authors@R: c(person("Jeroen", "Ooms", role = c("aut", "cre"), email = "jeroenooms@gmail.com",
     comment = c(ORCID = "0000-0002-4035-0289")),
     person("Oliver", "Keyes", role = "ctb"))
 Description: Bindings to OpenSSL libssl and libcrypto, plus custom SSH key parsers.
@@ -23,14 +23,14 @@ VignetteBuilder: knitr
 Imports: askpass
 Suggests: curl, testthat (>= 2.1.0), digest, knitr, rmarkdown,
         jsonlite, jose, sodium
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8
 NeedsCompilation: yes
-Packaged: 2023-09-25 17:30:46 UTC; jeroen
+Packaged: 2024-09-19 16:09:16 UTC; jeroen
 Author: Jeroen Ooms [aut, cre] (<https://orcid.org/0000-0002-4035-0289>),
   Oliver Keyes [ctb]
-Maintainer: Jeroen Ooms <jeroen@berkeley.edu>
+Maintainer: Jeroen Ooms <jeroenooms@gmail.com>
 Repository: CRAN
-Date/Publication: 2023-09-25 19:10:02 UTC
-Built: R 4.3.2; x86_64-w64-mingw32; 2023-12-03 03:14:05 UTC; windows
+Date/Publication: 2024-09-20 08:40:05 UTC
+Built: R 4.4.2; x86_64-w64-mingw32; 2024-12-08 02:24:02 UTC; windows
 Archs: x64

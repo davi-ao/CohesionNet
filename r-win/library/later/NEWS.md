@@ -1,3 +1,23 @@
+# later 1.4.1
+
+* Fixed #203: Resolves an issue where packages that have `LinkingTo: later` (including `promises` and `httpuv`) and were built against `later` 1.4.0, would fail to load on systems that actually had older versions of `later` installed, erroring out with the message "function 'execLaterFdNative' not provided by package 'later'". With this fix, such dependent packages should gracefully deal with older versions at load time, and complain with helpful error messages if newer C interfaces (than are available on the installed `later`) are accessed. (#204)
+
+# later 1.4.0
+
+* Adds `later_fd()` which executes a function when a file descriptor is ready for reading or writing, at some indeterminate time in the future (subject to an optional timeout). This facilitates an event-driven approach to asynchronous or streaming downloads. (@shikokuchuo and @jcheng5, #190)
+
+* Fixed #186: Improvements to package load time as `rlang` is now only loaded when used. This is a notable efficiency for packages with only a 'linking to' dependency on `later`. Also updates to native symbol registration from dynamic lookup. (@shikokuchuo and @wch, #187)
+
+* Fixed #191: Errors raised in later callbacks were being re-thrown as generic C++ std::runtime_error with Rcpp >= 1.0.10 (since 2022!). (@shikokuchuo and @lionel-, #192)
+
+# later 1.3.2
+
+* Fixed `unused variable` compiler warning. (@MichaelChirico, #176)
+
+* Fixed #177: The order of includes in `later.h` could cause compilation errors on some platforms. (@jeroen, #178)
+
+* Closed #181: Fix R CMD check warning re error() format strings (for r-devel). (#133)
+
 # later 1.3.1
 
 * For C function declarations that take no parameters, added `void` parameter. (#172)

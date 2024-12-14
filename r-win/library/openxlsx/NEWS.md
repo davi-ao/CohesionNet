@@ -1,8 +1,30 @@
+# openxlsx 4.2.7.1
+
+* It's now possible to insert a hyperlinked image by passing a URL, relative or absolute file path, or mailto string to the new `address` parameter of `insertImage()`.
+
+# openxlsx 4.2.7
+
+* Fixed warning on `dataValidation(..., type = "list")` ([#342](https://github.com/ycphs/openxlsx/issues/342))
+* Added optional argument to `loadWorkbook` to decide if empty/blank cells should be converted to NA_character_ (the default) or left blank as is
+* `saveWorkbook()` now succeeds when called after the user has set column widths for a range of columns (e.g. 1:2), saved the workbook, then set column widths for a new range that is inclusive of the previous one (e.g. 1:5) ([#493](https://github.com/ycphs/openxlsx/issues/493)).
+
+## Improvements
+
+* Improve detectDates ([#288](https://github.com/ycphs/openxlsx/issues/288))
+* Preserve window size and position, also `getWindowSize()` and `setWindowSize()`  ([466](https://github.com/ycphs/openxlsx/pull/466))
+
+# openxlsx 4.2.6
+
+* Fix external links ([#410](https://github.com/ycphs/openxlsx/pull/410))
+* Do not add unneccessary sheetPr node ([#409](https://github.com/ycphs/openxlsx/pull/409))
+* Add support for `namedRegion`s having dots and other special characters ([#338](https://github.com/ycphs/openxlsx/issues/338)).
+* Add type blanks and not blanks to conditional formatting ([#311](https://github.com/ycphs/openxlsx/pull/311))
+
 # openxlsx 4.2.5
 
 ## Fixes
 
-* `openxlsx_setOp()` now works with named list ([#215](https://github.com/ycphs/openxlsx/issues/215))  
+* `openxlsx_setOp()` now works with named list ([#215](https://github.com/ycphs/openxlsx/issues/215))
 * `loadWorkbook()` imports `inlineStr`. Values remain `inlineStr` when writing the workbook with `saveWorkbook()`. Similar `read.xlsx` and `readWorkbook` import `inlineStr`.
 * `read.xlsx()` no longer changes random seed ([#183](https://github.com/ycphs/openxlsx/issues/183))
 * fixed a regression that caused fonts to be read in incorrectly ([#207](https://github.com/ycphs/openxlsx/issues/207))
@@ -10,6 +32,7 @@
 * fixed writing hyperlink formulas ([#200](https://github.com/ycphs/openxlsx/issues/200))
 * `write.xlsx()` now throws an error if it doesn't have write permissions ([#190](https://github.com/ycphs/openxlsx/issues/190))
 * `write.xlsx()` now again uses the default of `overwrite = TRUE` for saving files ([#249](https://github.com/ycphs/openxlsx/issues/249))
+* `as.character.formula()` exported to warn about potential conflicts with other packages ([#312](https://github.com/ycphs/openxlsx/issues/312), [#315](https://github.com/ycphs/openxlsx/pull/315))
 
 ## Improvements
 
@@ -376,7 +399,7 @@
 *  functions `addFilter` & `removeFilter` to add filters to columns
 
 *  Headers & footers extended, can now be set with `addWorksheet` and `setHeaderFooter`.
-  `setHeader` & `setFooter` deprecated.  
+  `setHeader` & `setFooter` deprecated.
 
 *  "fitToWidth" and "fitToHeight" logicals in `pageSetup`.
 

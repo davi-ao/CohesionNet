@@ -1,3 +1,24 @@
+# xml2 1.3.6
+
+* Now compatible with libxml2 2.12.0 and later (@KNnut).
+
+* Fixed format string issues detected in R-devel.
+
+* Remove unused dependencies on glue, withr and lifecycle (@mgirlich).
+
+* `print()` is faster for very long `xml_nodeset` inputs (#366, @michaelchirico).
+
+* `xml_attr()`, `xml_attrs()`, `xml_double()`, `xml_integer()`, `xml_length()`,
+  `xml_name()`, `xml_path()`, `xml_text()`, and `xml_type()` no longer use
+  S3 dispatch but instead dispatch in C, leading to considerable performance
+  improvements in many cases (@mgirlich, #400).
+
+* `xml_find_int()` analogous to `xml_find_num()` for returning integers 
+  matched by an XPath (#365, @michaelchirico).
+
+* `xml_serialize()` now includes the document type so that `xml_unserialize()` 
+  works also for HTML documents (#407, @HenrikBengtsson).
+
 # xml2 1.3.5
 
 * Small speedup for `xml_find_all()` (@mgirlich, #393).

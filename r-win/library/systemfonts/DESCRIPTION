@@ -1,7 +1,7 @@
 Type: Package
 Package: systemfonts
 Title: System Native Font Finding
-Version: 1.0.5
+Version: 1.1.0
 Authors@R: c(
     person("Thomas Lin", "Pedersen", , "thomas.pedersen@posit.co", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0002-5147-4711")),
@@ -27,11 +27,12 @@ Suggests: covr, knitr, rmarkdown, testthat (>= 2.1.0), tools
 LinkingTo: cpp11 (>= 0.2.1)
 VignetteBuilder: knitr
 Encoding: UTF-8
-RoxygenNote: 7.1.2
+RoxygenNote: 7.3.1
 SystemRequirements: fontconfig, freetype2
 Config/Needs/website: tidyverse/tidytemplate
+Imports: lifecycle
 NeedsCompilation: yes
-Packaged: 2023-10-09 08:28:00 UTC; thomas
+Packaged: 2024-05-13 13:50:57 UTC; thomas
 Author: Thomas Lin Pedersen [aut, cre]
     (<https://orcid.org/0000-0002-5147-4711>),
   Jeroen Ooms [aut] (<https://orcid.org/0000-0002-4035-0289>),
@@ -39,6 +40,6 @@ Author: Thomas Lin Pedersen [aut, cre]
   Posit, PBC [cph, fnd]
 Maintainer: Thomas Lin Pedersen <thomas.pedersen@posit.co>
 Repository: CRAN
-Date/Publication: 2023-10-09 14:00:09 UTC
-Built: R 4.3.2; x86_64-w64-mingw32; 2023-12-03 02:06:06 UTC; windows
+Date/Publication: 2024-05-15 11:10:03 UTC
+Built: R 4.4.2; x86_64-w64-mingw32; 2024-12-08 02:24:01 UTC; windows
 Archs: x64

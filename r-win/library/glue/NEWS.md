@@ -1,3 +1,53 @@
+# glue 1.8.0
+
+* glue has a two new articles:
+  - "Get started", with contributions from @stephhazlitt and @BrennanAntone
+    (#137, #170, #332).
+  - How to write a function that wraps glue (#281).
+
+* If the last argument of `glue()` is empty, it is dropped (#320). This makes
+  it easy to structure `glue()` calls with one argument per line, and to anticipate adding arguments:
+  
+  ``` r
+  glue(
+    "here's some text, ",
+    "and maybe more text will be added in the future?",
+  )
+  ```
+
+* `glue_sql("{var*}")` once again generates `NULL` if var is empty.  
+  This reverts #292. (#318).
+
+* The `.envir` argument to `glue()` and `glue_data()` really must be an
+  environment now, as documented. Previously a list-ish object worked in
+  some cases (by accident, not really by design). When you need to lookup
+  values in a list-ish object, use `glue_data(.x =)` (#308, #317).
+  Ditto for `glue_sql()` and `glue_data_sql()`.
+
+# glue 1.7.0
+
+* If rlang is installed, glue will generate more informative errors if an
+  interpolated expression either can't be parsed or fails to evaluate (#229).
+
+* `+` now works in more situations, and gives errors when one side isn't a 
+  character vector. It no longer automatically applies glue interpolation to
+  a non-glue input, if there is one. You'll need to do that yourself (#286).
+
+* `glue_collapse(character())` (and hence `glue_sql_collapse(character())`) now
+  return `""`, so that they always return a single string (#88).
+
+* `glue_sql()` now collapses an empty vector to `""` not `"NULL"` (#272).
+
+* `glue_sql()` now uses `DBI::dbQuoteLiteral()` for all object types. This 
+  should increase fidelity of escaping for different object types (#279).
+
+* The "Speed of glue" vignette has been converted to an article, which allows
+  several package to be removed from `Suggests` (and re-located to
+  `Config/Needs/website`). The code got a light refresh, including a switch
+  from microbenchmark to bench and more modern use of ggplot2.
+
+* Add `$(C_VISIBILITY)` to compiler flags to hide internal symbols from the dll (#284 @lionel-).
+
 # glue 1.6.2
 
 * Modify a test for better forward compatibility with R.

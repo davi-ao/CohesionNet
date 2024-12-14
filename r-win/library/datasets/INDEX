@@ -15,7 +15,7 @@ InsectSprays            Effectiveness of Insect Sprays
 JohnsonJohnson          Quarterly Earnings per Johnson & Johnson Share
 LakeHuron               Level of Lake Huron 1875-1972
 LifeCycleSavings        Intercountry Life-Cycle Savings Data
-Loblolly                Growth of Loblolly pine trees
+Loblolly                Growth of Loblolly Pine Trees
 Nile                    Flow of the River Nile
 Orange                  Growth of Orange Trees
 OrchardSprays           Potency of Orchard Sprays
@@ -91,7 +91,7 @@ sunspot.year            Yearly Sunspot Data, 1700-1988
 sunspots                Monthly Sunspot Numbers, 1749-1983
 swiss                   Swiss Fertility and Socioeconomic Indicators
                         (1888) Data
-treering                Yearly Treering Data, -6000-1979
+treering                Yearly Tree-Ring Data, -6000-1979
 trees                   Diameter, Height and Volume for Black Cherry
                         Trees
 uspop                   Populations Recorded by the US Census

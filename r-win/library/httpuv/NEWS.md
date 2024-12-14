@@ -1,3 +1,19 @@
+# httpuv 1.6.15
+
+* `runStaticServer()` no longer fails if `browse = TRUE` but `utils::browseURL()` is unable to open the server. (#395)
+
+* Improved testing of `runStaticServer()` to accurately test that `runStaticServer()` throws an error when a requested port is not available on FreeBSD. (#396)
+
+# httpuv 1.6.14
+
+* Updated Makevars.ucrt for upcoming release of Rtools (thanks to Tomas Kalibera).
+
+* Fixed linking to zlib on macOS (thanks to @jeroen). (#387)
+
+# httpuv 1.6.13
+
+* Closed #388: Fix R CMD check warning re error() format strings (for r-devel). (#389)
+
 # httpuv 1.6.12
 
 * New `runStaticServer()` provides a convenient interface for serving a directory of static files. (#380)

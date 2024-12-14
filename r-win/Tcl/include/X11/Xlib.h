@@ -128,7 +128,9 @@ typedef int Status;
 typedef struct _XExtData {
 	int number;		/* number returned by XRegisterExtension */
 	struct _XExtData *next;	/* next item on list of data for structure */
-	int (*free_private)();	/* called to free private storage */
+	int (*free_private)(	/* called to free private storage */
+        struct _XExtData *extension
+        );
 	XPointer private_data;	/* data private to this extension. */
 } XExtData;
 
@@ -331,7 +333,17 @@ typedef struct _XImage {
     unsigned long blue_mask;
     XPointer obdata;		/* hook for the object routines to hang on */
     struct funcs {		/* image manipulation routines */
-	struct _XImage *(*create_image)();
+	struct _XImage *(*create_image)(
+     	        struct _XDisplay* /* display */,
+		Visual*		/* visual */,
+		unsigned int	/* depth */,
+		int		/* format */,
+		int		/* offset */,
+		char*		/* data */,
+		unsigned int	/* width */,
+		unsigned int	/* height */,
+		int		/* bitmap_pad */,
+		int		/* bytes_per_line */);
 #if NeedFunctionPrototypes
 	int (*destroy_image)        (struct _XImage *);
 	unsigned long (*get_pixel)  (struct _XImage *, int, int);
@@ -450,7 +462,8 @@ typedef struct _XDisplay {
 	XID resource_mask;	/* resource ID mask bits */
 	XID resource_id;	/* allocator current ID */
 	int resource_shift;	/* allocator shift to correct bits */
-	XID (*resource_alloc)(); /* allocator function */
+	XID (*resource_alloc)(  /* allocator function */
+	        struct _XDisplay*);
 	int byte_order;		/* screen byte order, LSBFirst, MSBFirst */
 	int bitmap_unit;	/* padding and data requirements */
 	int bitmap_pad;		/* padding requirements on bitmaps */
@@ -468,7 +481,7 @@ typedef struct _XDisplay {
 	char *bufmax;		/* Output buffer maximum+1 address. */
 	unsigned max_request_size; /* maximum number 32 bit words in request*/
 	struct _XrmHashBucketRec *db;
-	int (*synchandler)();	/* Synchronization handler */
+	int (*synchandler)(void);	/* Synchronization handler */
 	char *display_name;	/* "host:display" string used on this connect*/
 	int default_screen;	/* default screen for operations */
 	int nscreens;		/* number of screens on this server*/
@@ -493,8 +506,8 @@ typedef struct _XDisplay {
 	 * list to find the right procedure for each event might be
 	 * expensive if many extensions are being used.
 	 */
-	Bool (*event_vec[128])();  /* vector for wire to event */
-	Status (*wire_vec[128])(); /* vector for event to wire */
+	Bool (*event_vec[128])(void);  /* vector for wire to event */
+	Status (*wire_vec[128])(void); /* vector for event to wire */
 	KeySym lock_meaning;	   /* for XLookupString */
 	struct _XLockInfo *lock;   /* multi-thread state, display lock */
 	struct _XInternalAsync *async_handlers; /* for internal async */
@@ -506,7 +519,7 @@ typedef struct _XDisplay {
 	struct _XDisplayAtoms *atoms; /* for XInternAtom */
 	unsigned int mode_switch;  /* keyboard group modifiers */
 	struct _XContextDB *context_db; /* context database */
-	Bool (**error_vec)();      /* vector for wire to error */
+	Bool (**error_vec)(void);      /* vector for wire to error */
 	/*
 	 * Xcms information
 	 */
@@ -519,7 +532,7 @@ typedef struct _XDisplay {
 	struct _XIMFilter *im_filters;
 	struct _XSQEvent *qfree; /* unallocated event queue elements */
 	unsigned long next_event_serial_num; /* inserted into next queue elt */
-	int (*savedsynchandler)(); /* user synchandler when Xlib usurps */
+	int (*savedsynchandler)(void); /* user synchandler when Xlib usurps */
 } Display;
 
 #if NeedFunctionPrototypes	/* prototypes require event type definitions */
@@ -1050,10 +1063,14 @@ typedef struct {
     XFontSet        font_set;
 } XwcTextItem;
 
-typedef void (*XIMProc)();
-
 typedef struct _XIM *XIM;
 typedef struct _XIC *XIC;
+
+typedef void (*XIMProc)(
+    XIM,
+    XPointer,
+    XPointer
+);
 
 typedef unsigned long XIMStyle;
 

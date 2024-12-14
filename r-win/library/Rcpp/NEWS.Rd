@@ -3,7 +3,84 @@
 \newcommand{\ghpr}{\href{https://github.com/RcppCore/Rcpp/pull/#1}{##1}}
 \newcommand{\ghit}{\href{https://github.com/RcppCore/Rcpp/issues/#1}{##1}}
 
-\section{Changes in Rcpp rc version 1.0.11 (2023-07-03)}{
+\section{Changes in Rcpp release version 1.0.13-1 (2024-11-01)}{
+  \itemize{
+    \item Changes in Rcpp API:
+    \itemize{
+      \item Use read-only \code{VECTOR_PTR} and \code{STRING_PTR} only with
+      with R 4.5.0 or later (Kevin in \ghpr{1342} fixing \ghit{1341})
+    }
+    \item Changes in Rcpp Deployment:
+    \itemize{
+      \item Authors@R is now used in DESCRIPTION as mandated by CRAN
+    }
+  }
+}
+
+\section{Changes in Rcpp release version 1.0.13 (2024-07-11)}{
+  \itemize{
+    \item Changes in Rcpp API:
+    \itemize{
+      \item Set R_NO_REMAP if not already defined (Dirk in \ghpr{1296})
+      \item Add variadic templates to be used instead of generated code
+      (Andrew Johnson in \ghpr{1303})
+      \item Count variables were switches to \code{size_t} to avoid warnings
+      about conversion-narrowing (Dirk in \ghpr{1307})
+      \item Rcpp now avoids the usage of the (non-API) DATAPTR function when
+      accessing the contents of Rcpp Vector objects where possible. (Kevin in
+      \ghpr{1310})
+      \item Rcpp now emits an R warning on out-of-bounds Vector accesses. This
+      may become an error in a future Rcpp release. (Kevin in \ghpr{1310})
+      \item Switch \code{VECTOR_PTR} and \code{STRING_PTR} to new API-compliant
+      \code{RO} variants (Kevin in \ghpr{1317} fixing \ghit{1316})
+    }
+    \item Changes in Rcpp Deployment:
+    \itemize{
+      \item Small updates to the CI test containers have been made (\ghpr{1304})
+    }
+  }
+}
+
+\section{Changes in Rcpp release version 1.0.12 (2024-01-08)}{
+  \itemize{
+    \item Changes in Rcpp API:
+    \itemize{
+      \item Missing header includes as spotted by some recent tools were
+      added in two places (Michael Chirico in \ghpr{1272} closing
+      \ghit{1271}).
+      \item Casts to avoid integer overflow in matrix row/col selections
+      have neem added (Aaron Lun \ghpr{1281}).
+      \item Three print format correction uncovered by R-devel were
+      applied with thanks to Tomas Kalibera (Dirk in \ghpr{1285}).
+      \item Correct a print format correction in the RcppExports glue code
+      (Dirk in \ghpr{1288} fixing \ghit{1287}).
+      \item The upcoming \code{OBJSXP} addition to R 4.4.0 is supported in
+      the \code{type2name} mapper (Dirk and Iñaki in \ghpr{1293}).
+    }
+    \item Changes in Rcpp Attributes:
+    \itemize{
+      \item Generated interface code from base R that fails under LTO is now
+      corrected (Iñaki in \ghpr{1274} fixing a StackOverflow issue).
+    }
+    \item Changes in Rcpp Documentation:
+    \itemize{
+      \item The caption for third figure in the introductory vignette has
+      been corrected (Dirk in \ghpr{1277} fixing \ghit{1276}).
+      \item A small formatting issue was correct in an Rd file as
+      noticed by R-devel (Dirk in \ghpr{1282}).
+      \item The Rcpp FAQ vignette has been updated (Dirk in \ghpr{1284}).
+      \item The \code{Rcpp.bib} file has been refreshed to current package
+      versions.
+    }
+    \item Changes in Rcpp Deployment:
+    \itemize{
+      \item The RcppExports file for an included test package has been
+      updated (Dirk in \ghpr{1289}).
+    }
+  }
+}
+
+\section{Changes in Rcpp release version 1.0.11 (2023-07-03)}{
   \itemize{
     \item Changes in Rcpp API:
     \itemize{
@@ -11,10 +88,10 @@
       on linux (Lukasz in \ghpr{1243} closing \ghit{1242}).
       \item Two unit tests no longer accidentally bark on stdout (Dirk and
       Iñaki in \ghpr{1245}).
-      \item Compilation under C++ using \pkg{clang++} and its standard
+      \item Compilation under C++20 using \pkg{clang++} and its standard
       library is enabled (Dirk in \ghpr{1248} closing \ghit{1244}).
       \item Use backticks in a generated \code{.Call()} statement in
-      `RcppExports.R` (Dirk \ghpr{1256} closing \ghit{1255}).
+      \code{RcppExports.R} (Dirk \ghpr{1256} closing \ghit{1255}).
       \item Switch to \code{system2()} to capture standard error messages in
       error cases (Iñaki in \ghpr{1259} and \ghpr{1261} fixing \ghit{1257}).
     }
@@ -1756,8 +1833,7 @@
     }
     \item Changes in Rcpp sugar:
     \itemize{
-      \item New function \code{na_omit} based on the StackOverflow thread
-      \url{http://stackoverflow.com/questions/15953768/}
+      \item New function \code{na_omit} based on a StackOverflow thread
       \item New function \code{is_finite} and \code{is_infinite} that
       reproduces the behavior of R's \code{is.finite} and
       \code{is.infinite} functions

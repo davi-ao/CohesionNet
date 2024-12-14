@@ -83,12 +83,7 @@ ui = page_sidebar(
     actionButton('analyze', 
                  label = 'Run analysis', 
                  icon = icon('play'), 
-                 disabled = T),
-    helpText('Please, cite the following article when using this app: Oliveira, D. 
-              A., Senna, V., & Pereira, H. B. B. (2024). Indices of Textual 
-              Cohesion by Lexical Repetition Based on Semantic Networks of 
-              Cliques. Expert Systems with Applications, 237(2024), 121580. 
-             https://doi.org/10.1016/j.eswa.2023.121580')
+                 disabled = T)
   ),
   navset_card_tab(
     id = 'results',
@@ -119,6 +114,34 @@ ui = page_sidebar(
                 p('After setting the appropriate values for these settings, 
                   click the "Run analysis" button. Long texts may take several 
                   minutes to process.')
+              ), 
+              style = 'padding:1em'),
+    nav_panel('How to cite', 
+              div(
+                p('Please, cite the following references when using this app:'),
+                p('Oliveira, D. A., & Pereira, H. B. B. (2024a). CohesionNet 
+                  3.1.1. Zenodo.',
+                  a('https://doi.org/10.5281/zenodo.11206286',
+                    href = 'https://doi.org/10.5281/zenodo.11206286')),
+                p('Oliveira, D. A., & Pereira, H. B. B. (2024b). Modeling texts 
+                  with networks: Comparing five approaches to sentence 
+                  representation.', em('The European Physical Journal B,'),   
+                  em('97,'), 'Article 77. ', 
+                  a('https://doi.org/10.1140/epjb/s10051-024-00717-0', 
+                    href = 'https://doi.org/10.1140/epjb/s10051-024-00717-0')),
+                p('Oliveira, D. A., Senna, V., & Pereira, H. B. B. (2024a). 
+                  CohesionNet: Software for network-based textual cohesion 
+                  analysis.', em('Software Impacts,'), em('22,'), 
+                  'Article 100712. ', 
+                  a('https://doi.org/10.1016/j.simpa.2024.100712',
+                    href = 'https://doi.org/10.1016/j.simpa.2024.100712')),
+                p('Oliveira, D. A., Senna, V., & Pereira, H. B. B. (2024b). 
+                  Indices of textual cohesion by lexical repetition based on 
+                  semantic networks of cliques. ', 
+                  em('Expert Systems with Applications,'), em('237,'), 
+                  'Article 121580. ',
+                  a('https://doi.org/10.1016/j.eswa.2023.121580',
+                    href = 'https://doi.org/10.1016/j.eswa.2023.121580'))
               ), 
               style = 'padding:1em'),
     nav_panel('Error',
@@ -166,7 +189,7 @@ server = function(input, output, session) {
   
   observeEvent(input$analyze, {
     showPageSpinner()
-    nav_hide('results', 'Instructions')
+    nav_hide('results', 'Instructions', 'How to cite')
     
     req(results())
     

@@ -17,9 +17,6 @@ filter.tbl_lazy         Subset rows using column values
 get_returned_rows       Extract and check the 'RETURNING' rows
 group_by.tbl_lazy       Group by one or more variables
 head.tbl_lazy           Subset the first rows
-ident                   Flag a character vector as SQL identifiers
-in_schema               Refer to a table in a schema or a database
-                        catalog
 intersect.tbl_lazy      SQL set operations
 join.tbl_sql            Join SQL tables
 memdb_frame             Create a database table in temporary in-memory

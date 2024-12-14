@@ -1,6 +1,6 @@
 Package: vroom
 Title: Read and Write Rectangular Text Data Quickly
-Version: 1.6.4
+Version: 1.6.5
 Authors@R: c(
     person("Jim", "Hester", role = "aut",
            comment = c(ORCID = "0000-0002-2739-7082")),
@@ -41,9 +41,9 @@ Config/testthat/parallel: false
 Copyright: file COPYRIGHTS
 Encoding: UTF-8
 Language: en-US
-RoxygenNote: 7.2.3
+RoxygenNote: 7.2.3.9000
 NeedsCompilation: yes
-Packaged: 2023-10-02 04:48:51 UTC; jenny
+Packaged: 2023-12-05 16:46:59 UTC; jenny
 Author: Jim Hester [aut] (<https://orcid.org/0000-0002-2739-7082>),
   Hadley Wickham [aut] (<https://orcid.org/0000-0003-4757-117X>),
   Jennifer Bryan [aut, cre] (<https://orcid.org/0000-0002-6983-2759>),
@@ -54,6 +54,6 @@ Author: Jim Hester [aut] (<https://orcid.org/0000-0002-2739-7082>),
   Posit Software, PBC [cph, fnd]
 Maintainer: Jennifer Bryan <jenny@posit.co>
 Repository: CRAN
-Date/Publication: 2023-10-02 14:30:02 UTC
-Built: R 4.3.2; x86_64-w64-mingw32; 2023-12-03 03:45:05 UTC; windows
+Date/Publication: 2023-12-05 23:50:02 UTC
+Built: R 4.4.2; x86_64-w64-mingw32; 2024-12-08 02:59:37 UTC; windows
 Archs: x64

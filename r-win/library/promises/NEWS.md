@@ -1,3 +1,18 @@
+# promises 1.3.2
+
+* Fixed bug introduced in 1.3.1, where promise domains that are active at promise resolution time stay active during handler callback, even if they weren't active when the handler was registered. This was causing stack overflow for long promise chains with many active promise domains. (#115)
+
+
+# promises 1.3.1
+
+* Fixed bug where promise domains were forgotten when handlers were registered from within other handlers. (#110)
+
+
+# promises 1.3.0
+
+* `is.promising` is now an S3 method. (#104)
+
+
 # promises 1.2.1
 
 * `future_promise()` received a speed improvement when submitting many requests with a minimal number of `{future}` workers. If `future_promise()` runs out of available `{future}` workers, then `future_promise()` will preemptively return for the remainder of the current `{later}` execution. While it is possible for `{future}` to finish a job before submitting all of the `future_promise()` requests, the time saved by not asking `{future}`'s worker availability will be faster overall than if a few jobs were submitted early. (#78)

@@ -22,5 +22,5 @@ Author: Brian Ripley [aut, cre, cph],
 Maintainer: Brian Ripley <ripley@stats.ox.ac.uk>
 Repository: CRAN
 Date/Publication: 2023-07-20 15:08:46 UTC
-Built: R 4.3.2; x86_64-w64-mingw32; 2023-10-31 14:13:19 UTC; windows
+Built: R 4.4.2; x86_64-w64-mingw32; 2024-10-31 16:58:36 UTC; windows
 Archs: x64

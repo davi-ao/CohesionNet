@@ -4,7 +4,7 @@ CRAN_package_db         CRAN Package Repository Tools
 HTMLheader              Generate a Standard HTML Header for R Help
 QC                      QC Checks for R Code and/or Documentation
 R_user_dir              R User Directories
-Rcmd                    R CMD Interface
+Rcmd                    'R CMD' Interface
 Rd2HTML                 Rd Converters
 Rd2txt_options          Set Formatting Options for Text Help
 RdTextFilter            Select Text in an Rd File
@@ -41,7 +41,7 @@ loadRdMacros            Load User-defined Rd Help System Macros
 make_translations_pkg   Package the Current Translations in the R
                         Sources
 makevars_user           User and Site Compilation Variables
-matchConcordance        Concordance between source and target lines.
+matchConcordance        Concordance between source and target lines
 md5sum                  Compute MD5 Checksums
 package_dependencies    Computations on the Dependency Hierarchy of
                         Packages
@@ -50,6 +50,7 @@ package_native_routine_registration_skeleton
                         Registration to a Package
 parseLatex              Experimental Functions to Work with LaTeX Code
 parse_Rd                Parse an Rd File
+pkg2HTML                Rd Converters
 pskill                  Kill a Process
 psnice                  Get or Set the Priority (Niceness) of a Process
 read.00Index            Read 00Index-style Files
