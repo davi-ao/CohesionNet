@@ -189,10 +189,10 @@ server = function(input, output, session) {
   
   observeEvent(input$analyze, {
     showPageSpinner()
-    nav_hide('results', 'Instructions', 'How to cite')
-    
+    nav_hide('results', 'Instructions')
+
     req(results())
-    
+
     lapply(1:length(results()), function(i) {
       nav_remove('results', paste('Text', i))
 
@@ -210,7 +210,7 @@ server = function(input, output, session) {
                            style = 'padding:1em'),
                  select = i == 1)
     })
-    
+
     hide('fileInput')
     show('reset')
     updateActionButton(inputId = 'analyze', disabled = T)
