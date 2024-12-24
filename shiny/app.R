@@ -177,22 +177,52 @@ server = function(input, output, session) {
   observeEvent(input$file, {
     if (is.null(input$file)) {
       nav_show('results', 'error1', T)
-      hidePageSpinner()
       validate(F)
     } else if (!(input$file$type == 'text/plain') %>% all()) {
       nav_show('results', 'error2', T)
-      hidePageSpinner()
       validate(F)
     } else {
       nav_hide('results', 'error1')
       nav_hide('results', 'error2')
+      
+      showPageSpinner()
+      
+      nS_est = lapply(input$file$datapath, function(path) {
+        read_file(path) %>%
+          str_split('\\.+') %>%
+          .[[1]] %>%
+          length()
+      }) %>%
+        purrr::simplify() %>%
+        sum()
+      
+      time_est = round(54.3 * exp(1.11E-03 * nS_est))
+
+      nav_remove('results', 'Processing time')
+      nav_insert('results',
+                 nav_panel('Processing time',
+                           div(
+                             p(paste0('The estimated processing time is ',
+                                      ifelse(time_est < 60, 
+                                             paste0(time_est, 's.'),
+                                             paste0(ceiling(time_est/60), 
+                                                    'min.')))),
+                             p(ifelse(time_est/60 > 30 &&
+                                       length(input$file$datapath) > 1,
+                                      'Consider splitting the analysis into
+                                      multiple sessions.',
+                                      '')),
+                             style = 'padding:1em')),
+                 select = T)
+      
+      hidePageSpinner()
+      
       updateActionButton(inputId = 'analyze', disabled = F)
     }
   })
   
   observeEvent(input$analyze, {
     showPageSpinner()
-    nav_hide('results', 'Instructions')
 
     req(results())
 
@@ -215,6 +245,7 @@ server = function(input, output, session) {
                  select = i == 1)
     })
 
+    nav_remove('results', 'Processing time')
     hide('fileInput')
     show('reset')
     updateActionButton(inputId = 'analyze', disabled = T)
