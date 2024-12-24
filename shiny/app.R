@@ -15,8 +15,8 @@
 # install.packages('SnowballC')
 # install.packages('openxlsx')
 # install.packages('shinyWidgets')
-# install.packages("remotes")
-# remotes::install_github("daattali/shinycssloaders")
+# install.packages('remotes')
+# remotes::install_github('daattali/shinycssloaders')
 # install.packages('bslib')
 # install.packages('DT')
 # install.packages('igraph')
@@ -162,6 +162,9 @@ ui = page_sidebar(
                    icon = icon('download')),
     downloadButton('download_networks',
                    'Networks (.xlsx)',
+                   icon = icon('download')),
+    downloadButton('download_everything',
+                   'Everything (.xlsx)',
                    icon = icon('download'))
   )
 )
@@ -193,17 +196,18 @@ server = function(input, output, session) {
 
     req(results())
 
-    lapply(1:length(results()), function(i) {
+    lapply(1:length(results()$indices), function(i) {
       nav_remove('results', paste('Text', i))
 
       nav_insert('results',
                  nav_panel(paste('Text', i),
                            h4(renderText(paste('Results for',
                                                 input$file$name[i]))),
-                           renderDataTable(results()[[i]]),
+                           h5(renderText('Cohesion indices')),
+                           renderDataTable(results()$indices[[i]]),
                            hr(),
-                           h4(renderText('Mean values')),
-                           renderTable(results()[[i]] %>%
+                           h5(renderText('Mean values')),
+                           renderTable(results()$indices[[i]] %>%
                                          group_by(Index) %>%
                                          summarize(Vertex = mean(Vertex),
                                                    Edge = mean(Edge))),
@@ -222,6 +226,7 @@ server = function(input, output, session) {
   })
   
   results = reactive({
+    startTime = Sys.time()
     req(networks())
     
     # English -nyms networks
@@ -231,7 +236,7 @@ server = function(input, output, session) {
                   '3' = read_graph('./english_nyms_lemmas.net', 'pajek'),
                   '4' = read_graph('./english_nyms_stems.net', 'pajek'))
      
-    lapply(networks(), function(G) {
+    indices = lapply(networks(), function(G) {
       global_indices = calculate_global_cohesion(G$segments, G$G_next, nyms)
       local_indices = calculate_local_cohesion(G$segments, nyms)
       pairwise_indices = calculate_pairwise_cohesion(G$segments, nyms)
@@ -244,6 +249,11 @@ server = function(input, output, session) {
                Vertex = v,
                Edge = e)
     })
+    
+    endTime = Sys.time()
+    
+    list(indices = indices, 
+         time = difftime(endTime, startTime, units = 'secs')[[1]])
   })
   
   networks = reactive({
@@ -251,6 +261,28 @@ server = function(input, output, session) {
 
     lapply(data(), function(d) {
       create_network(d, input$lexical, input$vertex_type, input$edge_type)
+    })
+  })
+  
+  descriptives = reactive({
+    req(data())
+    req(results())
+    
+    lapply(data(), function(d) {
+      d %>%
+        ungroup() %>%
+        summarize(`Number of segments` = segment_id %>% unique() %>% length(),
+                  `Number of tokens` = n(),
+                  `Number of unique tokens (words)` = word %>% 
+                    unique() %>% 
+                    length(),
+                  `Number of unique tokens (lemmas)` = lemma %>% 
+                    unique() %>% 
+                    length(),
+                  `Number of unique tokens (stems)` = stem %>% 
+                    unique() %>% 
+                    length()) %>%
+        pivot_longer(everything(), names_to = 'Variable', values_to = 'Value')
     })
   })
   
@@ -280,7 +312,7 @@ server = function(input, output, session) {
         rename(Source = from,
                Target = to,
                CohesionEdge = cohesion_edge) %>%
-        mutate(Type = "Undirected",
+        mutate(Type = 'Undirected',
                CohesionEdge = CohesionEdge %>% as.numeric()) %>%
         select(Source, Target, Type, CohesionEdge)
       
@@ -293,7 +325,7 @@ server = function(input, output, session) {
   
   output$download_processed_texts = downloadHandler(
     filename = function(){
-      paste("processed_texts_", Sys.Date(), ".zip", sep = "")
+      paste('processed_texts_', Sys.time(), '.zip', sep = '')
     },
     content = function(file){
       temp_directory = file.path(tempdir(), as.integer(Sys.time()))
@@ -307,28 +339,11 @@ server = function(input, output, session) {
           }
         })
       
-      zip::zip(
-        zipfile = file,
-        files = dir(temp_directory),
-        root = temp_directory
-      )
-    },
-    contentType = "application/zip"
-  )
-  
-  output$download_results = downloadHandler(
-    filename = function(){
-      paste("results_", Sys.Date(), ".zip", sep = "")
-    },
-    content = function(file){
-      temp_directory = file.path(tempdir(), as.integer(Sys.time()))
-      dir.create(temp_directory)
-      
-      results() %>%
+      descriptives() %>%
         imap(function(x,y){
           if(!is.null(x)){
-            file_name = paste0(str_sub(input$file$name[y], 0, -5),
-                               '_cohesion_indices.xlsx')
+            file_name = paste0(str_sub(input$file$name[y], 0, -5), 
+                               '_descriptives.xlsx')
             write.xlsx(x, file.path(temp_directory, file_name))
           }
         })
@@ -339,12 +354,41 @@ server = function(input, output, session) {
         root = temp_directory
       )
     },
-    contentType = "application/zip"
+    contentType = 'application/zip'
+  )
+  
+  output$download_results = downloadHandler(
+    filename = function(){
+      paste('results_', Sys.time(), '.zip', sep = '')
+    },
+    content = function(file){
+      temp_directory = file.path(tempdir(), as.integer(Sys.time()))
+      dir.create(temp_directory)
+      
+      results()$indices %>%
+        imap(function(x,y){
+          if(!is.null(x)){
+            file_name = paste0(str_sub(input$file$name[y], 0, -5),
+                               '_cohesion_indices.xlsx')
+            write.xlsx(x, file.path(temp_directory, file_name))
+          }
+        })
+      
+      write_file(paste('Total processing time = ', results()$time), 
+                 file.path(temp_directory, 'processing_time.txt'))
+      
+      zip::zip(
+        zipfile = file,
+        files = dir(temp_directory),
+        root = temp_directory
+      )
+    },
+    contentType = 'application/zip'
   )
   
   output$download_networks = downloadHandler(
     filename = function(){
-      paste("networks_", Sys.Date(), ".zip", sep = "")
+      paste('networks_', Sys.time(), '.zip', sep = '')
     },
     content = function(file){
       temp_directory = file.path(tempdir(), as.integer(Sys.time()))
@@ -365,7 +409,62 @@ server = function(input, output, session) {
         root = temp_directory
       )
     },
-    contentType = "application/zip"
+    contentType = 'application/zip'
+  )
+  
+  output$download_everything = downloadHandler(
+    filename = function(){
+      paste('anlaysis_', Sys.time(), '.zip', sep = '')
+    },
+    content = function(file){
+      temp_directory = file.path(tempdir(), as.integer(Sys.time()))
+      dir.create(temp_directory)
+      
+      data() %>%
+        imap(function(x,y){
+          if(!is.null(x)){
+            file_name = paste0(str_sub(input$file$name[y], 0, -5), '_data.xlsx')
+            write.xlsx(x, file.path(temp_directory, file_name))
+          }
+        })
+      
+      descriptives() %>%
+        imap(function(x,y){
+          if(!is.null(x)){
+            file_name = paste0(str_sub(input$file$name[y], 0, -5), 
+                               '_descriptives.xlsx')
+            write.xlsx(x, file.path(temp_directory, file_name))
+          }
+        })
+      
+      results()$indices %>%
+        imap(function(x,y){
+          if(!is.null(x)){
+            file_name = paste0(str_sub(input$file$name[y], 0, -5),
+                               '_cohesion_indices.xlsx')
+            write.xlsx(x, file.path(temp_directory, file_name))
+          }
+        })
+      
+      network_files() %>%
+        imap(function(x,y){
+          if(!is.null(x)){
+            file_name = paste0(str_sub(input$file$name[y], 0, -5), 
+                               '_network.xlsx')
+            write.xlsx(x, file.path(temp_directory, file_name))
+          }
+        })
+      
+      write_file(paste('Total processing time = ', results()$time), 
+                 file.path(temp_directory, 'processing_time.txt'))
+      
+      zip::zip(
+        zipfile = file,
+        files = dir(temp_directory),
+        root = temp_directory
+      )
+    },
+    contentType = 'application/zip'
   )
 }
 
