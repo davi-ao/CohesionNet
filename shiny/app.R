@@ -196,7 +196,7 @@ server = function(input, output, session) {
         purrr::simplify() %>%
         sum()
       
-      time_est = round(54.3 * exp(1.11E-03 * nS_est))
+      time_est = round(54.9 * exp(1.11E-03 * nS_est))
 
       nav_remove('results', 'Processing time')
       nav_insert('results',

@@ -83,7 +83,8 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                      group_by(name) %>%
                      summarise(segments = paste0(
                        '<[',
-                       paste(segment_id[!is.na(segment_id)], collapse = ','), 
+                       paste(unique(segment_id[!is.na(segment_id)]), 
+                             collapse = ','), 
                        ']>'))
                  )
 
@@ -166,7 +167,8 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                      group_by(name) %>%
                      summarise(segments = paste0(
                        '<[',
-                       paste(segment_id[!is.na(segment_id)], collapse = ','), 
+                       paste(unique(segment_id[!is.na(segment_id)]), 
+                             collapse = ','), 
                        ']>'))
                  )
                
@@ -247,7 +249,8 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                      group_by(name) %>%
                      summarise(segments = paste0(
                        '<[',
-                       paste(segment_id[!is.na(segment_id)], collapse = ','), 
+                       paste(unique(segment_id[!is.na(segment_id)]), 
+                             collapse = ','), 
                        ']>'))
                  )
                
