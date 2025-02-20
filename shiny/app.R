@@ -50,6 +50,7 @@ source('create_network_function.R')
 # Fluid container
 ui = page_sidebar(
   title = 'CohesionNet',
+  window_title = 'CohesionNet 3.3.1',
   sidebar = sidebar(
     width = '400px',
     useShinyjs(),
