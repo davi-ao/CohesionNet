@@ -50,7 +50,7 @@ source('create_network_function.R')
 # Fluid container
 ui = page_sidebar(
   title = 'CohesionNet',
-  window_title = 'CohesionNet 3.3.1',
+  window_title = 'CohesionNet 3.3.2',
   sidebar = sidebar(
     width = '400px',
     useShinyjs(),
@@ -190,14 +190,15 @@ server = function(input, output, session) {
       
       nS_est = lapply(input$file$datapath, function(path) {
         read_file(path) %>%
-          str_split('\\.+') %>%
-          .[[1]] %>%
+          udpipe_parsing(input$language, complete = F) %>%
+          .$sentence_id %>%
+          unique() %>%
           length()
       }) %>%
         purrr::simplify() %>%
         sum()
       
-      time_est = round(54.9 * exp(1.11E-03 * nS_est))
+      time_est = round(22.6 * exp(2.99E-03 * nS_est))
 
       nav_remove('results', 'Processing time')
       nav_insert('results',
@@ -322,7 +323,7 @@ server = function(input, output, session) {
     lapply(input$file$datapath, function(path) {
       read_file(path) %>%
         # Parse with udpipe
-        udpipe_parsing(input$language, input$lexical)
+        udpipe_parsing(input$language)
     })
   })
   
