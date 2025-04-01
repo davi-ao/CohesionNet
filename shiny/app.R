@@ -447,7 +447,7 @@ server = function(input, output, session) {
   
   output$download_everything = downloadHandler(
     filename = function(){
-      paste('anlaysis_', Sys.time(), '.zip', sep = '')
+      paste('analysis_', Sys.time(), '.zip', sep = '')
     },
     content = function(file){
       temp_directory = file.path(tempdir(), as.integer(Sys.time()))
