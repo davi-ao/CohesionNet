@@ -28,8 +28,8 @@ freezePane              Freeze a worksheet pane
 getBaseFont             Return the workbook default font
 getCellRefs             Return excel cell coordinates from (x,y)
                         coordinates
-getCreators             Add another author to the meta data of the
-                        file.
+getCreators             Get the names of the authors from the meta data
+                        of the file.
 getDateOrigin           Get the date origin an xlsx file is using
 getNamedRegions         Get named regions
 getSheetNames           Get names of worksheets
@@ -73,8 +73,7 @@ setColWidths            Set worksheet column widths
 setFooter               Set footer for all worksheets
 setHeader               Set header for all worksheets
 setHeaderFooter         Set document headers and footers
-setLastModifiedBy       Add another author to the meta data of the
-                        file.
+setLastModifiedBy       Set the author who modified the file last.
 setRowHeights           Set worksheet row heights
 setWindowSize           Set and Get Window Size for xlsx file
 sheetVisibility         Get/set worksheet visible state

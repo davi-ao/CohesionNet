@@ -2,7 +2,7 @@ Rscript                 Run the commands 'Rscript' and 'R CMD'
 Rscript_call            Call a function in a new R session via
                         'Rscript()'
 alnum_id                Generate ID strings
-attr                    Obtain an attribute of an object without
+attr2                   Obtain an attribute of an object without
                         partial matching
 base64_encode           Encode/decode data into/from base64 encoding.
 base64_uri              Generate the Data URI for a file
@@ -12,8 +12,6 @@ broken_packages         Find out broken packages and reinstall them
 bump_version            Bump version numbers
 cache_exec              Cache the execution of an expression in memory
                         or on disk
-cache_rds               Cache the value of an R expression to an RDS
-                        file
 crandalf_check          Submit check jobs to crandalf
 csv_options             Parse comma-separated chunk options
 decimal_dot             Evaluate an expression after forcing the
@@ -36,6 +34,7 @@ file_ext                Manipulate filename extensions
 file_rename             Rename files and directories
 file_string             Read a text file and concatenate the lines by
                         "\n"
+find_globals            Find global/local variables in R code
 format_bytes            Format numbers of bytes using a specified unit
 from_root               Get the relative path of a path in a project
                         relative to the current working directory
@@ -56,6 +55,7 @@ is_blank                Test if a character vector consists of blank
 is_sub_path             Test if a path is a subpath of a dir
 is_web_path             Test if a path is a web path
 is_windows              Test for types of operating systems
+join_words              Join multiple words into a single string
 lazy_save               Save objects to files and lazy-load them
 magic_path              Find a file or directory under a root directory
 mark_dirs               Mark some paths as directories
@@ -73,6 +73,8 @@ optipng                 Run OptiPNG on all PNG files under a directory
 parse_only              Parse R code and do not keep the source
 pkg_attach              Attach or load packages, and automatically
                         install missing packages if requested
+pkg_bib                 Generate BibTeX bibliography databases for R
+                        packages
 proc_kill               Kill a process and (optionally) all its child
                         processes
 process_file            Read a text file, process the text with a
@@ -83,6 +85,8 @@ prose_index             Find the indices of lines in Markdown that are
                         prose (not code blocks)
 protect_math            Protect math expressions in pairs of backticks
                         in Markdown
+rand_unit               Pseudo-random numbers on [0, 1) based on a
+                        linear congruential generator
 raw_string              Print a character vector in its raw form
 read_all                Read all text files and concatenate their
                         content
@@ -108,11 +112,15 @@ set_envvar              Set environment variables
 shrink_images           Shrink images to a maximum width
 split_lines             Split a character vector by line breaks
 split_source            Split source lines into complete expressions
+str_wrap                Wrap character vectors
 strict_list             Strict lists
 strip_html              Strip HTML tags
 submit_cran             Submit a source package to CRAN
 system3                 Run 'system2()' and mark its character output
                         as UTF-8 if appropriate
+tabset                  Represent a (recursive) list with (nested)
+                        tabsets
+taml_load               A simple YAML reader and writer
 tinify                  Use the Tinify API to compress PNG and JPEG
                         images
 tojson                  A simple JSON serializer
@@ -122,6 +130,7 @@ try_silent              Try to evaluate an expression silently
 upload_ftp              Upload to an FTP server via 'curl'
 upload_imgur            Upload an image to imgur.com
 url_accessible          Test if a URL is accessible
+url_destination         Get the final destination of a URL
 url_filename            Extract filenames from a URLs
 valid_syntax            Check if the syntax of the code is valid
 yaml_body               Partition the YAML metadata and the body in a

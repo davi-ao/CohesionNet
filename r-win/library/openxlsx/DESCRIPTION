@@ -1,8 +1,8 @@
 Type: Package
 Package: openxlsx
 Title: Read, Write and Edit xlsx Files
-Version: 4.2.7.1
-Date: 2024-09-19
+Version: 4.2.8
+Date: 2025-01-25
 Authors@R: 
     c(person(given = "Philipp",
              family = "Schauberger",
@@ -65,7 +65,7 @@ Collate: 'CommentClass.R' 'HyperlinkClass.R' 'RcppExports.R'
         'writeData.R' 'writeDataTable.R' 'writexlsx.R' 'zzz.R'
 LazyData: true
 NeedsCompilation: yes
-Packaged: 2024-09-18 22:29:51 UTC; janmarvingarbuszus
+Packaged: 2025-01-25 19:28:01 UTC; janmarvingarbuszus
 Author: Philipp Schauberger [aut],
   Alexander Walker [aut],
   Luca Braglia [ctb],
@@ -76,6 +76,6 @@ Author: Philipp Schauberger [aut],
   Reinhold Kainhofer [ctb]
 Maintainer: Jan Marvin Garbuszus <jan.garbuszus@ruhr-uni-bochum.de>
 Repository: CRAN
-Date/Publication: 2024-09-20 12:50:02 UTC
-Built: R 4.4.2; x86_64-w64-mingw32; 2024-12-08 02:15:52 UTC; windows
+Date/Publication: 2025-01-25 20:30:02 UTC
+Built: R 4.4.3; x86_64-w64-mingw32; 2025-04-14 01:08:00 UTC; windows
 Archs: x64

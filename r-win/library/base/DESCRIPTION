@@ -1,12 +1,12 @@
 Package: base
-Version: 4.4.2
+Version: 4.4.3
 Priority: base
 Title: The R Base Package
 Author: R Core Team and contributors worldwide
 Maintainer: R Core Team <do-use-Contact-address@r-project.org>
 Contact: R-help mailing list <r-help@r-project.org>
 Description: Base R functions.
-License: Part of R 4.4.2
+License: Part of R 4.4.3
 Suggests: methods
 Enhances: chron, date, round
-Built: R 4.4.2; ; 2024-10-31 16:47:30 UTC; windows
+Built: R 4.4.3; ; 2025-02-28 10:26:15 UTC; windows

@@ -1,3 +1,25 @@
+6.3.0
+ - Fix a unit test for libcurl 8.13.0
+ - Cleanup build
+
+6.2.1
+ - Workaround for change of behavior in libcurl 8.12.0
+ - The multi-run fail callback argument now has a curl-error class
+ - Fixed a slowness in curl_echo() due to threading problem in httpuv
+
+6.2.0
+ - MacOS: we have temporarily switched to a static build of libcurl 8.11.1 until
+   apple updates their very buggy libcurl (#376)
+ - Fix LTO error for R_multi_setopt
+ - Fix parsing of #fragment links in curl_parse() (#366)
+
+6.1.0
+ - Fix a rchk bug
+ - Enable CURLOPT_PIPEWAIT by default to prefer multiplex when possible
+ - Enable setting max_streams in multi_set(), default to 10
+ - Allow open(curl::curl()) to be interrupted
+ - Interrupting a download no longer causes an error (#365)
+
 6.0.1
  - Fix a build issue with libcurl 8.11.0
  - Support multi_fdset() for connection objects (#355)

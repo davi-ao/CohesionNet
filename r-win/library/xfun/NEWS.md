@@ -1,3 +1,73 @@
+# CHANGES IN xfun VERSION 0.52
+
+- `xfun::attr()` is deprecated (to avoid masking `base::attr()`). Please use `xfun::attr2()` or `base::attr(exact = TRUE)` instead.
+
+- Added an argument `date` to `pkg_bib()` to optionally include the date of retrieval in the bib entries (thanks, @HedvigS, #99).
+
+- Added a new function `url_destination()` to get the destination of a redirected URL.
+
+- Added a new function `rand_unit()` to generate pseudo-random numbers on `[0, 1)` based on a linear congruential generator.
+
+- Fixed a bug in `taml_load()` that would convert character values in arrays to lowercase.
+
+- Added arguments `strict` and `...` to `divide_chunk()` (thanks, @cderv, yihui/knitr#2225).
+
+- The function `cache_rds()` is no longer recommended. Please consider using `cache_exec()` instead (thanks, @lenz99, #100).
+
+- Removed the `solaris` argument from `upload_win_builder()`.
+
+# CHANGES IN xfun VERSION 0.51
+
+- `tojson()` supports more types of data now, and will indent sub-elements for lists. See the help page [`?xfun::tojson`](https://git.yihui.org/xfun/manual.html#sec:man-tojson) for details.
+
+- Updated the default API key for `upload_imgur()` since the previous default key stopped working for some reason (thanks, @camille-s @jennybc, #97).
+
+- `upload_imgur()` shows the error message instead of the error code when it fails to upload the image, which is more informative.
+
+- `download_file()` returns the path of the file downloaded instead of the command status code now.
+
+# CHANGES IN xfun VERSION 0.50
+
+- The function `isFALSE()` has been removed from this package. The deprecation notice was given two years ago: https://yihui.org/en/2023/02/xfun-isfalse/
+
+- Added a new function `tabset()` to represent a list with a tabset. The representation is similar to `str()`, but uses a visual form.
+
+- Factored out the function `taml_load()` and exported it (TAML is a tiny subset of YAML). Also added a new function `taml_save()` to convert simple lists to YAML.
+
+- The `print` argument of `record()` can accept non-function values now, in which case `print()` (or `show()` for S4 objects) will be used as the print function.
+
+- The `record()` results can also be formatted to Markdown via `format(record(), to = 'markdown')`.
+
+- Moved `knitr::combine_words()` into this package as `xfun::join_words()`. The former has become a simple wrapper of the latter.
+
+- Similarly, moved `knitr::write_bib()` into this package as `xfun::pkg_bib()`.
+
+- Moved the internal function `str_wrap()` from **knitr** and exported it as `xfun::str_wrap()`.
+
+- Exported the internal `find_globals()` and `find_locals()` functions.
+
+- `md_table()` escapes `|` in the table to `\|` instead of `&#124;` now.
+
+- `yaml_load(use_yaml = FALSE)` allows for indenting sub-fields by any number of spaces now (thanks, @J-Moravec, #95). Previously, one level of indentation must use exactly 2 spaces.
+
+- `divide_chunk()` no longer requires every line of chunk options to be commented out when the engine uses a pair of comment delimiters (such as `/*` and `*/` for CSS) instead of a single comment character. It suffices to use the opening delimiter at the beginning and closing delimiter at the end, e.g.,
+
+  ````md
+  ```{css}
+  /*| echo=FALSE,
+      label='foo' */
+  ```
+  ````
+  
+  Previously, every line must be commented out like:
+  
+  ````md
+  ```{css}
+  /*| echo=FALSE, */
+  /*| label='foo' */
+  ```
+  ````
+
 # CHANGES IN xfun VERSION 0.49
 
 - Added an argument `use_block = FALSE` to `protect_math()`. When `use_block = TRUE`, a `$$ $$` expression that spans across multiple lines will be protected in a code block.

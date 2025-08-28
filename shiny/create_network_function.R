@@ -1,4 +1,9 @@
-create_network = function(parsed_text, lexical, vertex_type, edge_type) {
+create_network = function(
+    parsed_text,
+    lexical,
+    vertex_type,
+    edge_type,
+    add_weights) {
   # English -nyms networks
   nyms = switch(vertex_type,
                 '1' = read_graph('./english_nyms_lemmas.net', 'pajek'),
@@ -51,11 +56,28 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                  ungroup() %>%
                  filter(!is.na(Target) & Source != '' & Target != '')
                
+               print(parsed_text %>%
+                       select(segment_id, vertex) %>%
+                       rename(Source = vertex) %>%
+                       group_by(segment_id) %>%
+                       mutate(Target = Source %>% lead()))
+               
                G =  edge_list %>%
                  select(Source, Target) %>%
                  as.matrix() %>%
-                 graph_from_edgelist(directed = F) %>%
-                 simplify() %>%
+                 graph_from_edgelist(directed = F)
+               
+               if (add_weights) {
+                 E(G)$weight = 1
+                 
+                 G = G %>%
+                   simplify(edge.attr.comb = list(weight = 'sum'))
+               } else {
+                 G = G %>%
+                   simplify()
+               }
+               
+               G = G %>%
                  set_edge_attr('cohesion_edge', value = F)
                
                nyms_sub_edges = nyms %>%
@@ -63,12 +85,14 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                                               V(nyms)$name]) %>%
                  ends(., E(.))
                
-               for (row in 1:nrow(nyms_sub_edges)) {
-                 if (!G %>% are_adjacent(nyms_sub_edges[row,1], 
-                                         nyms_sub_edges[row,2])) {
-                   G = G %>%
-                     add_edges(c(nyms_sub_edges[row,1], nyms_sub_edges[row,2]),
-                               cohesion_edge = T)
+               if (nrow(nyms_sub_edges) > 0) {
+                 for (row in 1:nrow(nyms_sub_edges)) {
+                   if (!G %>% are_adjacent(nyms_sub_edges[row,1], 
+                                           nyms_sub_edges[row,2])) {
+                     G = G %>%
+                       add_edges(c(nyms_sub_edges[row,1], nyms_sub_edges[row,2]),
+                                 cohesion_edge = T)
+                   }
                  }
                }
                
@@ -138,8 +162,19 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                G =  edge_list %>%
                  select(Source, Target) %>%
                  as.matrix() %>%
-                 graph_from_edgelist(directed = F) %>%
-                 simplify() %>%
+                 graph_from_edgelist(directed = F)
+                 
+               if (add_weights) {
+                 E(G)$weight = 1
+                 
+                 G = G %>%
+                   simplify(edge.attr.comb = list(weight = 'sum'))
+               } else {
+                 G = G %>%
+                   simplify()
+               }
+             
+               G = G %>%
                  set_edge_attr('cohesion_edge', value = F)
                
                nyms_sub_edges = nyms %>%
@@ -147,12 +182,14 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                                               V(nyms)$name]) %>%
                  ends(., E(.))
                
-               for (row in 1:nrow(nyms_sub_edges)) {
-                 if (!G %>% are_adjacent(nyms_sub_edges[row,1], 
-                                         nyms_sub_edges[row,2])) {
-                   G = G %>%
-                     add_edges(c(nyms_sub_edges[row,1], nyms_sub_edges[row,2]),
-                               cohesion_edge = T)
+               if (nrow(nyms_sub_edges) > 0) {
+                 for (row in 1:nrow(nyms_sub_edges)) {
+                   if (!G %>% are_adjacent(nyms_sub_edges[row,1], 
+                                           nyms_sub_edges[row,2])) {
+                     G = G %>%
+                       add_edges(c(nyms_sub_edges[row,1], nyms_sub_edges[row,2]),
+                                 cohesion_edge = T)
+                   }
                  }
                }
                
@@ -220,8 +257,19 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                G =  edge_list %>%
                  select(Source, Target) %>%
                  as.matrix() %>%
-                 graph_from_edgelist(directed = F) %>%
-                 simplify() %>%
+                 graph_from_edgelist(directed = F)
+               
+               if (add_weights) {
+                 E(G)$weight = 1
+                 
+                 G = G %>%
+                   simplify(edge.attr.comb = list(weight = 'sum'))
+               } else {
+                 G = G %>%
+                   simplify()
+               }
+               
+               G = G %>%
                  set_edge_attr('cohesion_edge', value = F)
                
                nyms_sub_edges = nyms %>%
@@ -229,12 +277,14 @@ create_network = function(parsed_text, lexical, vertex_type, edge_type) {
                                               V(nyms)$name]) %>%
                  ends(., E(.))
                
-               for (row in 1:nrow(nyms_sub_edges)) {
-                 if (!G %>% are_adjacent(nyms_sub_edges[row,1], 
-                                         nyms_sub_edges[row,2])) {
-                   G = G %>%
-                     add_edges(c(nyms_sub_edges[row,1], nyms_sub_edges[row,2]),
-                               cohesion_edge = T)
+               if (nrow(nyms_sub_edges) > 0) {
+                 for (row in 1:nrow(nyms_sub_edges)) {
+                   if (!G %>% are_adjacent(nyms_sub_edges[row,1], 
+                                           nyms_sub_edges[row,2])) {
+                     G = G %>%
+                       add_edges(c(nyms_sub_edges[row,1], nyms_sub_edges[row,2]),
+                                 cohesion_edge = T)
+                   }
                  }
                }
                

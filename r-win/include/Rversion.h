@@ -6,20 +6,20 @@
 extern "C" {
 #endif
 
-#define R_VERSION 263170
-#define R_NICK "Pile of Leaves"
+#define R_VERSION 263171
+#define R_NICK "Trophy Case"
 #define R_Version(v,p,s) (((v) * 65536) + ((p) * 256) + (s))
 #define R_MAJOR  "4"
-#define R_MINOR  "4.2"
+#define R_MINOR  "4.3"
 #define R_STATUS ""
-#define R_YEAR   "2024"
-#define R_MONTH  "10"
-#define R_DAY    "31"
-#define R_SVN_REVISION 87279
+#define R_YEAR   "2025"
+#define R_MONTH  "02"
+#define R_DAY    "28"
+#define R_SVN_REVISION 87843
 #ifdef __llvm__
-# define R_FILEVERSION    4,42,21743,0
+# define R_FILEVERSION    4,43,22307,0
 #else
-# define R_FILEVERSION    4,42,87279,0
+# define R_FILEVERSION    4,43,87843,0
 #endif
 
 #ifdef __cplusplus

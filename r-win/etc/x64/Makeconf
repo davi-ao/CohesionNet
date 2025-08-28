@@ -36,7 +36,7 @@ RC_ARCH =
 TCL_HOME = $(R_HOME)/Tcl
 
 # automatically rewritten to assign value from MkRules
-LOCAL_SOFT ?= D:/rtools44a/x86_64-w64-mingw32.static.posix
+LOCAL_SOFT ?= D:/rtools44/x86_64-w64-mingw32.static.posix
 
 R_INSTALLER_BUILD = no
  R_INSTALLER_BUILD = yes

@@ -4,7 +4,7 @@
 #
 # Authors: Davi Alves Oliveira and Hernane Borges de Barros Pereira
 #
-# Last update: November 19, 2024
+# Last update: August 28, 2025
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------
@@ -16,7 +16,7 @@
 # install.packages('openxlsx')
 # install.packages('shinyWidgets')
 # install.packages('remotes')
-# remotes::install_github('daattali/shinycssloaders')
+# install.packages('shinycssloaders')
 # install.packages('bslib')
 # install.packages('DT')
 # install.packages('igraph')
@@ -50,7 +50,7 @@ source('create_network_function.R')
 # Fluid container
 ui = page_sidebar(
   title = 'CohesionNet',
-  window_title = 'CohesionNet 3.3.2',
+  window_title = 'CohesionNet 3.4.0',
   sidebar = sidebar(
     width = '400px',
     useShinyjs(),
@@ -74,13 +74,14 @@ ui = page_sidebar(
                                'lemma' = 3,
                                'stem' = 4),
                 selected = 4),
+    checkboxInput('lexical', 'Keep only lexical tokens', T),
     selectInput('edge_type',
                 label = 'Segment representation',
                 choices = list('line' = 1, 
                                'clique' = 2,
                                'dependency-based' = 3),
                 selected = 3),
-    checkboxInput('lexical', 'Keep only lexical tokens', T),
+    checkboxInput('weights', 'Sum multiple edges', F),
     actionButton('analyze', 
                  label = 'Run analysis', 
                  icon = icon('play'), 
@@ -105,23 +106,25 @@ ui = page_sidebar(
                   as punctuation marks. The definition "lemma" includes only 
                   unique lemmatized words. The definition "stem" includes only 
                   unique stemmed lemmas.'),
+                p('The option "Keep only lexical tokens" removes all tokens that
+                  are not identified as nouns, adjectives, verbs or adverbs.'),
                 p('Select the segment representation. The "line" representation
                   connects each consecutive token in a sentence. The "clique" 
                   representation connects every token in a sentence with each 
                   other. The "dependecy-based" representation creates a tree of
                   dependency relations for each sentence.'),
-                p('The option "Keep only lexical tokens" removes all tokens that
-                  are not identified as nouns, adjectives, verbs or adverbs.'),
+                p('The option "Sum multiple edges" add weights to edges and the 
+                  weights are the number of edge overlap.'),
                 p('After setting the appropriate values for these settings, 
                   click the "Run analysis" button. Long texts may take several 
                   minutes to process.')
               ), 
               style = 'padding:1em'),
-    nav_panel('How to cite', 
+    nav_panel('References', 
               div(
-                p('Please, cite the following references when using this app:'),
+                h5('Please, cite the following references when using this app:'),
                 p('Oliveira, D. A., & Pereira, H. B. B. (2024a). CohesionNet 
-                  3.1.1. Zenodo.',
+                  (v3.3.3). Zenodo.',
                   a('https://doi.org/10.5281/zenodo.11206286',
                     href = 'https://doi.org/10.5281/zenodo.11206286')),
                 p('Oliveira, D. A., & Pereira, H. B. B. (2024b). Modeling texts 
@@ -142,8 +145,19 @@ ui = page_sidebar(
                   em('Expert Systems with Applications,'), em('237,'), 
                   'Article 121580. ',
                   a('https://doi.org/10.1016/j.eswa.2023.121580',
-                    href = 'https://doi.org/10.1016/j.eswa.2023.121580'))
-              ), 
+                    href = 'https://doi.org/10.1016/j.eswa.2023.121580')),
+              ),
+              div(),
+              div(
+                #h5('Incidence-Fidelity is defined in:'),
+                #p('Teixeira, G. M., Aguiar, M. S. F., Carvalho, C. F., Dantas, 
+                #  D. R., Cunha, M. V., Morais, J. H. M., Pereira, H. B. B., & 
+                #  Miranda, J. G. V. (2010). Complex semantic networks. ', 
+                #  em('International Journal of Modern Physics C,'), em('21'), 
+                #  '(3), 333–347. ',
+                #  a('https://doi.org/10.1142/S0129183110015142',
+                #    href = 'https://doi.org/10.1142/S0129183110015142')),
+              ),
               style = 'padding:1em'),
     nav_panel('Error',
               value = 'error1',
@@ -248,9 +262,15 @@ server = function(input, output, session) {
     })
 
     nav_remove('results', 'Processing time')
-    hide('fileInput')
-    show('reset')
     updateActionButton(inputId = 'analyze', disabled = T)
+    hide('analyze')
+    hide('fileInput')
+    hide('language')
+    hide('vertex_type')
+    hide('lexical')
+    hide('edge_type')
+    hide('weights')
+    show('reset')
     hidePageSpinner()
   })
   
@@ -293,7 +313,11 @@ server = function(input, output, session) {
     req(data())
 
     lapply(data(), function(d) {
-      create_network(d, input$lexical, input$vertex_type, input$edge_type)
+      create_network(d, 
+                     input$lexical, 
+                     input$vertex_type, 
+                     input$edge_type, 
+                     input$weights)
     })
   })
   
@@ -344,10 +368,11 @@ server = function(input, output, session) {
         igraph::as_data_frame('edges') %>%
         rename(Source = from,
                Target = to,
-               CohesionEdge = cohesion_edge) %>%
+               CohesionEdge = cohesion_edge,
+               Weight = weight) %>%
         mutate(Type = 'Undirected',
                CohesionEdge = CohesionEdge %>% as.numeric()) %>%
-        select(Source, Target, Type, CohesionEdge)
+        select(Source, Target, Type, CohesionEdge, Weight)
       
       list(Vertices = vertices, Edges = edges)
     })
