@@ -50,7 +50,7 @@ source('create_network_function.R')
 # Fluid container
 ui = page_sidebar(
   title = 'CohesionNet',
-  window_title = 'CohesionNet 3.4.0',
+  window_title = 'CohesionNet 3.5.0',
   sidebar = sidebar(
     width = '400px',
     useShinyjs(),
@@ -82,6 +82,7 @@ ui = page_sidebar(
                                'dependency-based' = 3),
                 selected = 3),
     checkboxInput('weights', 'Sum multiple edges', F),
+    checkboxInput('incidence_fidelity', 'Calculate Incidence-Fidelity', F),
     actionButton('analyze', 
                  label = 'Run analysis', 
                  icon = icon('play'), 
@@ -115,6 +116,8 @@ ui = page_sidebar(
                   dependency relations for each sentence.'),
                 p('The option "Sum multiple edges" add weights to edges and the 
                   weights are the number of edge overlap.'),
+                p('The option "Calculate Incidence-Fidelity (IF)" add weights to 
+                  edges and the weights are the IF index.'),
                 p('After setting the appropriate values for these settings, 
                   click the "Run analysis" button. Long texts may take several 
                   minutes to process.')
@@ -270,6 +273,7 @@ server = function(input, output, session) {
     hide('lexical')
     hide('edge_type')
     hide('weights')
+    hide('incidence_fidelity')
     show('reset')
     hidePageSpinner()
   })
@@ -317,7 +321,8 @@ server = function(input, output, session) {
                      input$lexical, 
                      input$vertex_type, 
                      input$edge_type, 
-                     input$weights)
+                     input$weights,
+                     input$incidence_fidelity)
     })
   })
   
@@ -368,11 +373,10 @@ server = function(input, output, session) {
         igraph::as_data_frame('edges') %>%
         rename(Source = from,
                Target = to,
-               CohesionEdge = cohesion_edge,
-               Weight = weight) %>%
+               CohesionEdge = cohesion_edge) %>%
         mutate(Type = 'Undirected',
                CohesionEdge = CohesionEdge %>% as.numeric()) %>%
-        select(Source, Target, Type, CohesionEdge, Weight)
+        relocate(Source, Target, Type, CohesionEdge)
       
       list(Vertices = vertices, Edges = edges)
     })

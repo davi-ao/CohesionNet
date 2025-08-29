@@ -3,7 +3,8 @@ create_network = function(
     lexical,
     vertex_type,
     edge_type,
-    add_weights) {
+    add_weights,
+    incidence_fidelity) {
   # English -nyms networks
   nyms = switch(vertex_type,
                 '1' = read_graph('./english_nyms_lemmas.net', 'pajek'),
@@ -46,6 +47,22 @@ create_network = function(
       rename(vertex = stem)
   }
   
+  if (incidence_fidelity) {
+    cooccurrences = parsed_text %>%
+      group_by(segment_id) %>%
+      select(vertex) %>%
+      rename(Source = vertex) %>%
+      mutate(Target = Source) %>%
+      expand(Source, Target) %>%
+      filter(Source != Target) %>%
+      rowwise() %>%
+      mutate(edge_id = sort(c(Source, Target)) %>% 
+               paste(collapse = '¬')) %>%
+      group_by(segment_id) %>%
+      distinct(edge_id, .keep_all = T) %>%
+      separate(edge_id, into = c('Source', 'Target'), sep = '¬')
+  }
+  
   G = switch(edge_type,
              '1' = { # line
                edge_list = parsed_text %>%
@@ -56,22 +73,16 @@ create_network = function(
                  ungroup() %>%
                  filter(!is.na(Target) & Source != '' & Target != '')
                
-               print(parsed_text %>%
-                       select(segment_id, vertex) %>%
-                       rename(Source = vertex) %>%
-                       group_by(segment_id) %>%
-                       mutate(Target = Source %>% lead()))
-               
                G =  edge_list %>%
                  select(Source, Target) %>%
                  as.matrix() %>%
                  graph_from_edgelist(directed = F)
                
                if (add_weights) {
-                 E(G)$weight = 1
+                 E(G)$Weight = 1
                  
                  G = G %>%
-                   simplify(edge.attr.comb = list(weight = 'sum'))
+                   simplify(edge.attr.comb = list(Weight = 'sum'))
                } else {
                  G = G %>%
                    simplify()
@@ -94,6 +105,30 @@ create_network = function(
                                  cohesion_edge = T)
                    }
                  }
+               }
+               
+               if (incidence_fidelity) {
+                 IF_indices = as_data_frame(G, 'edges') %>%
+                   mutate(IF = mapply(function(a, b) {
+                     a_and_b = cooccurrences %>%
+                       filter((Source == a & Target == b)|
+                                (Source == b & Target == a)) %>%
+                       distinct(segment_id) %>%
+                       nrow()
+                     
+                     a_or_b = cooccurrences %>%
+                       filter(Source == a | 
+                                Target == a | 
+                                Source == b | 
+                                Target == b) %>%
+                       distinct(segment_id) %>%
+                       nrow()
+                     
+                     (a_and_b^2)/
+                       (length(cooccurrences$segment_id %>% unique()) * a_or_b)
+                   }, from, to))
+                 
+                 E(G)$IF = IF_indices$IF
                }
                
                v = tibble(name = V(G)$name) %>%
@@ -165,10 +200,10 @@ create_network = function(
                  graph_from_edgelist(directed = F)
                  
                if (add_weights) {
-                 E(G)$weight = 1
+                 E(G)$Weight = 1
                  
                  G = G %>%
-                   simplify(edge.attr.comb = list(weight = 'sum'))
+                   simplify(edge.attr.comb = list(Weight = 'sum'))
                } else {
                  G = G %>%
                    simplify()
@@ -191,6 +226,30 @@ create_network = function(
                                  cohesion_edge = T)
                    }
                  }
+               }
+               
+               if (incidence_fidelity) {
+                 IF_indices = as_data_frame(G, 'edges') %>%
+                   mutate(IF = mapply(function(a, b) {
+                     a_and_b = cooccurrences %>%
+                       filter((Source == a & Target == b)|
+                                (Source == b & Target == a)) %>%
+                       distinct(segment_id) %>%
+                       nrow()
+                     
+                     a_or_b = cooccurrences %>%
+                       filter(Source == a | 
+                                Target == a | 
+                                Source == b | 
+                                Target == b) %>%
+                       distinct(segment_id) %>%
+                       nrow()
+                     
+                     (a_and_b^2)/
+                       (length(cooccurrences$segment_id %>% unique()) * a_or_b)
+                   }, from, to))
+                 
+                 E(G)$IF = IF_indices$IF
                }
                
                v = tibble(name = V(G)$name) %>%
@@ -260,10 +319,10 @@ create_network = function(
                  graph_from_edgelist(directed = F)
                
                if (add_weights) {
-                 E(G)$weight = 1
+                 E(G)$Weight = 1
                  
                  G = G %>%
-                   simplify(edge.attr.comb = list(weight = 'sum'))
+                   simplify(edge.attr.comb = list(Weight = 'sum'))
                } else {
                  G = G %>%
                    simplify()
@@ -286,6 +345,30 @@ create_network = function(
                                  cohesion_edge = T)
                    }
                  }
+               }
+               
+               if (incidence_fidelity) {
+                 IF_indices = as_data_frame(G, 'edges') %>%
+                   mutate(IF = mapply(function(a, b) {
+                     a_and_b = cooccurrences %>%
+                       filter((Source == a & Target == b)|
+                                (Source == b & Target == a)) %>%
+                       distinct(segment_id) %>%
+                       nrow()
+                     
+                     a_or_b = cooccurrences %>%
+                       filter(Source == a | 
+                                Target == a | 
+                                Source == b | 
+                                Target == b) %>%
+                       distinct(segment_id) %>%
+                       nrow()
+                     
+                     (a_and_b^2)/
+                       (length(cooccurrences$segment_id %>% unique()) * a_or_b)
+                   }, from, to))
+                 
+                 E(G)$IF = IF_indices$IF
                }
                
                v = tibble(name = V(G)$name) %>%
