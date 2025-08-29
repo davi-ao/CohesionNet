@@ -82,7 +82,7 @@ ui = page_sidebar(
                                'dependency-based' = 3),
                 selected = 3),
     checkboxInput('weights', 'Sum multiple edges', F),
-    checkboxInput('incidence_fidelity', 'Calculate Incidence-Fidelity', F),
+    checkboxInput('incidence_fidelity', 'Calculate Incidence-Fidelity (IF)', F),
     actionButton('analyze', 
                  label = 'Run analysis', 
                  icon = icon('play'), 
@@ -117,7 +117,8 @@ ui = page_sidebar(
                 p('The option "Sum multiple edges" add weights to edges and the 
                   weights are the number of edge overlap.'),
                 p('The option "Calculate Incidence-Fidelity (IF)" add weights to 
-                  edges and the weights are the IF index.'),
+                  edges and the weights are the IF index (Teixeira', em('et al.,'), '2010)
+                  .'),
                 p('After setting the appropriate values for these settings, 
                   click the "Run analysis" button. Long texts may take several 
                   minutes to process.')
@@ -152,14 +153,14 @@ ui = page_sidebar(
               ),
               div(),
               div(
-                #h5('Incidence-Fidelity is defined in:'),
-                #p('Teixeira, G. M., Aguiar, M. S. F., Carvalho, C. F., Dantas, 
-                #  D. R., Cunha, M. V., Morais, J. H. M., Pereira, H. B. B., & 
-                #  Miranda, J. G. V. (2010). Complex semantic networks. ', 
-                #  em('International Journal of Modern Physics C,'), em('21'), 
-                #  '(3), 333–347. ',
-                #  a('https://doi.org/10.1142/S0129183110015142',
-                #    href = 'https://doi.org/10.1142/S0129183110015142')),
+                h5('Incidence-Fidelity is defined in:'),
+                p('Teixeira, G. M., Aguiar, M. S. F., Carvalho, C. F., Dantas, 
+                  D. R., Cunha, M. V., Morais, J. H. M., Pereira, H. B. B., & 
+                  Miranda, J. G. V. (2010). Complex semantic networks. ', 
+                  em('International Journal of Modern Physics C,'), em('21'), 
+                  '(3), 333–347. ',
+                  a('https://doi.org/10.1142/S0129183110015142',
+                    href = 'https://doi.org/10.1142/S0129183110015142')),
               ),
               style = 'padding:1em'),
     nav_panel('Error',
